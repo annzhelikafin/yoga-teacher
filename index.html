@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f6ef">
+<title>Практика — конструктор класса йоги</title>
+<style>
+:root {
+  font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+  color:#21312a; background:#f5f6ef; font-size:16px;
+  --ink:#21312a; --green:#265849; --dark:#164638; --muted:#53675d; --line:#dce3d8;
+  --paper:#fdfefb; --sage:#ecf2e8; --warm:#f8f0dd; --red:#843a2e;
+}
+* {box-sizing:border-box}
+[hidden] {display:none!important}
+body {margin:0; min-width:300px}
+a {color:var(--dark); text-underline-offset:3px}
+button,select,input,textarea {font:inherit}
+button {cursor:pointer}
+button:disabled {cursor:default; opacity:.48}
+:focus-visible {outline:2px solid #2b715a; outline-offset:3px}
+p {line-height:1.55}
+h1,h2,h3,p {margin:0}
+h1,h2,h3 {font-family:Georgia,"Times New Roman",serif; font-weight:normal}
+h2 {font-size:1.62rem; letter-spacing:-.025em}
+.mast {border-bottom:1px solid var(--line); background:#fbfcf7}
+.mast-inner {max-width:1376px; margin:auto; padding:16px 48px; display:flex; align-items:center; justify-content:space-between; gap:24px}
+.brand {display:inline-flex; gap:12px; align-items:center; text-decoration:none; color:var(--ink); font-family:Georgia,serif; font-size:1.46rem; line-height:1.08}
+.brand small {display:block; color:var(--muted); font:600 .75rem/1.4 "Avenir Next","Segoe UI",Arial,sans-serif; margin-top:3px}
+.brand-sign {display:block; position:relative; width:41px; height:41px; flex:none; border-radius:50%; border:1px solid #9ab3a1; background:#e5eee0}
+.brand-sign i {position:absolute; width:10px; height:19px; left:15px; top:9px; transform-origin:50% 90%; border:1px solid var(--green); border-radius:85% 85% 65% 65%}
+.brand-sign i:first-child {transform:rotate(-47deg)}
+.brand-sign i:last-child {transform:rotate(47deg)}
+nav {display:flex; gap:28px}
+nav a {text-decoration:none; font-size:.9rem; font-weight:650; color:var(--muted)}
+nav a:hover {color:var(--dark); text-decoration:underline}
+main {max-width:1376px; margin:auto; padding:0 48px}
+.intro {min-height:182px; padding:39px 0 30px; display:flex; align-items:center}
+.intro h1 {font-size:clamp(2.6rem,5.8vw,5.05rem); letter-spacing:-.06em; line-height:.99; color:#214739}
+.intro p {margin-top:16px; color:var(--muted); max-width:550px}
+.workspace {display:grid; grid-template-columns:minmax(320px,365px) minmax(0,1fr); gap:24px; align-items:start}
+.sidebar {display:grid; gap:20px; min-width:0}
+.card {min-width:0; background:var(--paper); border:1px solid var(--line); border-radius:21px; box-shadow:0 8px 24px #294f3710}
+.settings,.helper {padding:23px}
+.settings h2,.helper h2 {margin-bottom:15px}
+#settings,#chat-form,#edit-form {display:grid; gap:13px}
+.pair,.warm-pair {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px}
+.warm-pair {grid-template-columns:minmax(0,1fr) 90px}
+.field {display:grid; gap:5px; align-content:start; font-size:.86rem; font-weight:700; line-height:1.32; min-width:0}
+.field .optional {display:inline; color:var(--muted); font-weight:500; font-size:.75rem; margin-top:-4px}
+.field select,.field input,.field textarea {
+  color:var(--ink); width:100%; min-width:0; height:40px; border-radius:8px; border:1px solid #cfd9cd;
+  background:#fbfcf8; padding:8px 9px; font-size:.88rem; font-weight:500;
+}
+.field textarea {height:auto; min-height:58px; resize:vertical; line-height:1.45}
+.field select {appearance:none; padding-right:24px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='8' viewBox='0 0 11 8'%3E%3Cpath d='M1 2l4.5 4L10 2' stroke='%23496458' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center}
+.rule {border-top:1px solid #e6ebe3; margin:2px 0}
+.filters {border:0; padding:0; margin:0; min-width:0; display:grid; gap:6px}
+.filters legend {padding:0; margin-bottom:6px; font-size:.86rem; font-weight:700}
+.filter {border:1px solid #dfe6dd; border-radius:8px; overflow:hidden}
+.filter summary,.info-details summary,.preview-details summary {cursor:pointer; list-style:none; font-size:.87rem; font-weight:650}
+.filter summary {padding:9px 10px; display:flex; gap:6px; align-items:center}
+.filter summary:after {content:""; border-bottom:1.5px solid var(--green); border-right:1.5px solid var(--green); width:6px; height:6px; transform:rotate(45deg); margin-left:4px; margin-top:-3px}
+.filter[open] summary:after {transform:rotate(225deg); margin-top:4px}
+summary::-webkit-details-marker {display:none}
+.selection {margin-left:auto; color:var(--muted); font-size:.75rem}
+.options {display:grid; gap:8px; border-top:1px solid var(--line); padding:10px}
+.check {display:flex; gap:8px; align-items:flex-start; font-size:.86rem; font-weight:550; line-height:1.35}
+.check input {accent-color:var(--dark); margin:1px 0 0; width:16px; height:16px; flex:none}
+.options .suboption {padding-left:16px}
+.button {background:#f9fbf6; color:var(--dark); border:1px solid #ccd8cb; border-radius:8px; padding:9px 14px; font-size:.88rem; font-weight:700; line-height:1.3; min-height:37px}
+.button:hover:enabled {background:#e8f0e5; border-color:#94aa9c}
+.button.primary {background:var(--dark); color:white; border-color:var(--dark); min-height:43px}
+.button.primary:hover:enabled {background:#245e4b; border-color:#245e4b}
+.button.export {border-color:#8ca89a; color:var(--dark); background:#eef4eb; white-space:nowrap}
+.button.small {padding:6px 10px; min-height:33px; font-size:.81rem}
+.button.reset {justify-self:start; padding:6px 10px; min-height:32px; font-size:.81rem}
+.button.reset[aria-pressed="true"] {background:#deebdd; border-color:#97b3a0}
+.notice {border:1px solid #e1cfaa; border-radius:9px; padding:10px 12px; background:#fbf5e8; font-size:.85rem; line-height:1.44; color:#654b28}
+.notice.error {background:#fff3ed; color:var(--red); border-color:#eac9bd}
+.notice.good {background:#eaf3e9; color:var(--dark); border-color:#c6dac8}
+.notice+.notice {margin-top:7px}
+.notice button {margin-top:7px; white-space:normal}
+#form-advice:empty,#program-message:empty,#chat-log:empty,#proposal:empty {display:none}
+.program {padding:24px 24px 20px; scroll-margin-top:15px}
+.program-heading {display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:17px}
+.program-heading p,.model-status {font-size:.82rem; color:var(--muted); margin-top:4px}
+.plan-title {background:#ebf2e6; border:1px solid #dbe7d8; border-radius:15px; padding:18px 19px 16px; overflow-wrap:anywhere}
+.plan-title h3 {font-size:clamp(1.48rem,3vw,2.3rem); letter-spacing:-.035em; line-height:1.08}
+.plan-audience {font-size:.85rem; color:#415b4c; margin:8px 0 14px; line-height:1.4}
+.timing-bar {display:grid; gap:3px; height:5px; border-radius:5px; overflow:hidden; background:#dce9da; margin-bottom:11px}
+.timing-bar span:nth-child(1) {background:#7c9c76}
+.timing-bar span:nth-child(2) {background:#356b53}
+.timing-bar span:nth-child(3) {background:#bc9d61}
+.totals {display:flex; flex-wrap:wrap; gap:5px 18px; font-size:.82rem; font-weight:650; color:#314f3f}
+.info-details {margin-top:12px; border-top:1px solid #d8e4d4; padding-top:10px}
+.info-details summary:after,.preview-details summary:after {content:" +"; color:var(--green)}
+.info-details[open] summary:after,.preview-details[open] summary:after {content:" −"}
+.info-details dl {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 16px; margin:10px 0 0; font-size:.8rem}
+.info-details dl div {min-width:0}
+.info-details dt {font-weight:700}
+.info-details dd {margin:0;color:#425649; white-space:pre-wrap}
+.toolbar {display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin:13px 0}
+.time-delta {color:#4e6658; font-size:.82rem; font-weight:650; padding:6px 0; margin-left:auto}
+.time-delta.problem {color:var(--red)}
+.block {margin-top:14px}
+.block-head {display:flex; justify-content:space-between; gap:10px; align-items:center; background:#f1f4ec; border-radius:9px; padding:9px 11px}
+.block-head h3 {font-size:1.27rem}
+.block-head time {color:#3e6552; font-weight:700; font-size:.86rem; white-space:nowrap}
+.timeline-row {border-bottom:1px solid #e6ebe3; padding:11px 5px 10px}
+.timeline-row:last-child {border-bottom:0}
+.timeline-row summary {display:grid; grid-template-columns:106px minmax(0,1fr) auto; align-items:start; list-style:none; gap:8px; cursor:pointer}
+.interval,.row-duration {font-variant-numeric:tabular-nums; white-space:nowrap; color:#4c6a5b; font-size:.83rem; font-weight:650; line-height:1.6}
+.row-duration:after {content:" +"; display:inline-block; margin-left:2px; color:var(--green)}
+.timeline-row[open] .row-duration:after {content:" −"}
+.row-name {font-weight:730; min-width:0; line-height:1.4}
+.row-time {display:block; font-weight:500; color:var(--muted); font-size:.79rem; margin-top:3px; overflow-wrap:anywhere}
+.row-details {margin:8px 0 2px 114px; overflow-wrap:anywhere; display:grid; gap:7px}
+.row-details p,.row-details a {font-size:.85rem}
+.row-copy {display:flex; gap:12px; align-items:flex-start}
+.row-copy>div {display:grid; gap:5px}
+.thumbnail {width:66px; height:54px; background:#eaf2e8; border-radius:8px; flex:none}
+.row-actions,.quick,.proposal-actions {display:flex; flex-wrap:wrap; gap:6px; margin-top:2px}
+.row-actions .remove {color:#803f33}
+.helper .model-status {margin-top:-10px; margin-bottom:13px}
+.helper .quick {margin-bottom:12px}
+.helper #chat-form {gap:8px}
+.helper #ask {justify-self:start; white-space:normal}
+.chat-line {font-size:.87rem; background:#ebf2e8; padding:9px 11px; border-radius:8px; margin:7px 0; overflow-wrap:anywhere}
+.chat-line.user {background:#f3f0e7}
+.proposal {background:#edf4ea; border:1px solid #d4e2d3; border-radius:12px; padding:10px; margin-top:12px}
+.proposal>p {font-size:.84rem; margin-bottom:7px}
+.proposal details {margin:8px 0}
+.preview-list {max-height:260px; overflow:auto; padding:0 0 0 22px; font-size:.79rem; margin:7px 0}
+.preview-list li {margin:4px 0; line-height:1.4}
+.empty {padding:28px 15px; border:1px dashed #bed0c1; border-radius:14px; text-align:center; color:var(--muted)}
+footer {display:flex; justify-content:space-between; align-items:start; gap:16px; color:var(--muted); font-size:.81rem; border-top:1px solid var(--line); margin-top:30px; padding:16px 0 24px}
+footer>div {display:flex; flex-wrap:wrap; gap:8px 15px}
+dialog {padding:22px; width:min(92vw,460px); border:1px solid var(--line); border-radius:17px; background:var(--paper); color:var(--ink)}
+dialog::backdrop {background:#172c23a0}
+.dialog-head {display:flex; align-items:start; justify-content:space-between; gap:10px}
+.edit-hint {font-size:.8rem; color:var(--muted)}
+@media (max-width:1020px) {
+  main,.mast-inner {padding-left:24px; padding-right:24px}
+  .workspace {grid-template-columns:minmax(294px,330px) minmax(0,1fr); gap:16px}
+  .settings,.helper,.program {padding:17px}
+  .timeline-row summary {grid-template-columns:90px minmax(0,1fr) auto}
+  .row-details {margin-left:98px}
+}
+@media (max-width:740px) {
+  main,.mast-inner {padding-left:14px; padding-right:14px}
+  .mast-inner {gap:10px 12px; flex-wrap:wrap; padding-top:11px; padding-bottom:10px}
+  .mast-inner nav {order:3; width:100%; justify-content:center; gap:19px; border-top:1px solid var(--line); padding-top:8px}
+  .mast-inner nav a {font-size:.84rem}
+  .intro {min-height:0; padding:26px 0 21px}
+  .intro h1 {font-size:clamp(2.35rem,9.5vw,3.45rem)}
+  .intro p {font-size:.9rem; margin-top:10px}
+  .workspace {grid-template-columns:minmax(0,1fr); gap:13px}
+  .sidebar {display:contents}
+  .settings {grid-row:1}
+  .program {grid-row:2}
+  .helper {grid-row:3}
+  .program-heading h2 {font-size:1.45rem}
+  .timeline-row summary {grid-template-columns:85px minmax(0,1fr) auto; gap:5px}
+  .row-details {margin-left:12px}
+  .interval,.row-duration {font-size:.76rem}
+  .row-name {font-size:.88rem}
+  .time-delta {width:100%; margin-left:0}
+  footer {flex-direction:column}
+  .field select,.field input,.field textarea {font-size:1rem}
+}
+
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="mast-inner">
+    <a href="#top" class="brand">
+      <span class="brand-sign" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>Практика<small>Для преподавателей йоги</small></span>
+    </a>
+    <nav aria-label="Разделы страницы"><a href="#parameters">Параметры</a><a href="#program">Программа</a><a href="#assistant">Помощник</a></nav>
+    <button class="button export" type="button" data-action="pdf" disabled>Скачать PDF</button>
+  </div>
+</header>
+<main id="top">
+  <div class="intro">
+    <div>
+      <h1>Конструктор класса</h1>
+      <p>Подберите асаны, отредактируйте последовательность и скачайте план занятия.</p>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="sidebar">
+      <section class="card settings" id="parameters" aria-labelledby="parameters-title">
+        <h2 id="parameters-title">Параметры класса</h2>
+        <form id="settings">
+          <label class="field">Акцент класса<select name="goal" id="goal"></select></label>
+          <label class="field" id="custom-wrap" hidden>Свой акцент<input name="custom" maxlength="140" placeholder="Например, мягкая подвижность плеч"></label>
+          <div class="pair">
+            <label class="field">Формат<select name="format" id="format"></select></label>
+            <label class="field">Состав<select name="composition" id="composition"></select></label>
+          </div>
+          <div class="pair">
+            <label class="field"><span id="age-label">Примерный возраст</span><select name="age" id="age"></select></label>
+            <label class="field">Уровень<select name="level" id="level"></select></label>
+          </div>
+          <div class="rule"></div>
+          <div class="pair">
+            <label class="field">Время класса<select name="duration"><option value="60">60 минут</option><option value="90">90 минут</option></select></label>
+            <label class="field">Шавасана<select name="savasana"><option value="5">5 минут</option><option value="10">10 минут</option><option value="15">15 минут</option><option value="20">20 минут</option></select></label>
+          </div>
+          <div class="warm-pair">
+            <label class="field">Разминка<select name="warmup" id="warmup"></select></label>
+            <label class="field">Минуты<input name="warmMinutes" type="number" min="4" max="30" step="1" inputmode="numeric" required></label>
+          </div>
+          <label class="field">Положение для финального отдыха<select name="final" id="final"></select></label>
+          <div class="rule"></div>
+          <fieldset class="filters">
+            <legend>Асаны основной части</legend>
+            <button class="button reset" type="button" data-action="all" aria-pressed="true">Все асаны</button>
+            <details class="filter" id="positions"><summary>Положения тела<span class="selection"></span></summary><div class="options"></div></details>
+            <details class="filter" id="types"><summary>Виды асан<span class="selection"></span></summary><div class="options"></div></details>
+          </fieldset>
+          <label class="field">Ограничения <span class="optional">при наличии</span><textarea name="limits" rows="2" maxlength="500" placeholder="Например, без опоры на кисти"></textarea></label>
+          <label class="field">Инвентарь <span class="optional">при наличии</span><textarea name="equipment" rows="2" maxlength="250" placeholder="Например, блоки и пледы"></textarea></label>
+          <label class="check"><input name="soft" type="checkbox"> Мягкая нагрузка</label>
+          <div id="form-advice" aria-live="polite"></div>
+          <div class="notice error" id="form-error" role="alert" hidden></div>
+          <button class="button primary generate" type="submit">Составить класс</button>
+        </form>
+      </section>
+      <section class="card helper" id="assistant" aria-labelledby="assistant-title">
+        <h2 id="assistant-title">Помощник</h2>
+        <p class="model-status" id="model-status">Локальные команды · модель не подключена</p>
+        <div class="quick">
+          <button type="button" class="button small" data-chat="Сделай класс мягче">Сделать мягче</button>
+          <button type="button" class="button small" data-chat="Подбери замену без опоры на кисти">Без опоры на кисти</button>
+          <button type="button" class="button small" data-chat="Добавь больше внимания грудному отделу">Акцент на грудной отдел</button>
+        </div>
+        <div id="chat-log" aria-live="polite"></div>
+        <form id="chat-form">
+          <label class="field">Что изменить в программе<textarea id="chat-text" rows="2" maxlength="500" required placeholder="Например, сделай класс мягче"></textarea></label>
+          <label id="model-consent" class="check" hidden><input type="checkbox" id="send-model"> Отправить команду модели при необходимости. Вводите текст без имён участников.</label>
+          <button class="button export" id="ask" type="submit">Предложить изменения</button>
+        </form>
+        <div id="proposal"></div>
+      </section>
+    </div>
+    <section class="card program" id="program" aria-labelledby="program-title">
+      <div class="program-heading">
+        <div><h2 id="program-title">Программа занятия</h2><p id="plan-status" role="status">Черновик сохраняется в браузере</p></div>
+        <button type="button" class="button small" data-action="pdf" disabled>Скачать PDF</button>
+      </div>
+      <div id="program-body"></div>
+      <div id="program-message" tabindex="-1" aria-live="polite"></div>
+      <div id="timeline"></div>
+    </section>
+  </div>
+  <footer><p>Практика для взрослых. Подходящие движения и опоры подтверждает преподаватель.</p><div><a href="https://www.oum.ru/encyclopedia/asanas/" target="_blank" rel="noreferrer">Каталог OUM.RU</a><a href="https://www.nccih.nih.gov/health/yoga-effectiveness-and-safety" target="_blank" rel="noreferrer">Безопасность практики · NCCIH</a></div></footer>
+</main>
+<dialog id="editor">
+  <form id="edit-form">
+    <div class="dialog-head"><h2 id="edit-title">Изменить асану</h2><button type="button" class="button small" data-action="close">Закрыть</button></div>
+    <label class="field" id="edit-pose-wrap">Асана<select name="pose"></select></label>
+    <label class="field">Время строки в секундах<input type="number" name="seconds" min="1" step="1" inputmode="numeric" required></label>
+    <p class="edit-hint" id="edit-hint"></p>
+    <div class="notice error" id="edit-error" role="alert" hidden></div>
+    <button class="button primary" type="submit">Сохранить</button>
+  </form>
+</dialog>
+<script type="module">
+const __catalog=(()=>{
+const baseUrl = "https://www.oum.ru/encyclopedia/asanas/";
+const defaultGoals = [
+  ["whole","Сбалансированная практика","Общая практика","whole"],
+  ["begin","Мягкое начало занятий","Общая практика","mobility relax"],
+  ["back","Спина в целом","Спина","back"],
+  ["lumbar","Поясница","Спина","lumbar"],
+  ["chest","Грудной отдел","Спина","chest"],
+  ["spine","Подвижность позвоночника","Спина","back mobility"],
+  ["neck","Шея и плечевой пояс","Верх тела","shoulders relax"],
+  ["shoulders","Подвижность плеч","Верх тела","shoulders mobility"],
+  ["posture","Осанка","Верх тела","posture"],
+  ["hips","Подвижность тазобедренных суставов","Таз и ноги","hips"],
+  ["legs","Задняя поверхность ног","Таз и ноги","legs"],
+  ["feet","Стопы и голеностоп","Таз и ноги","feet"],
+  ["stretch","Общая растяжка","Физические качества","stretch"],
+  ["mobility","Мягкая подвижность","Физические качества","mobility"],
+  ["strength","Сила и устойчивость","Физические качества","strength"],
+  ["core","Мышцы корпуса","Физические качества","core"],
+  ["balance","Баланс и координация","Физические качества","balance"],
+  ["desk","Движение после сидячего дня","Повседневная нагрузка","hips shoulders back"],
+  ["restore","Восстановительная практика","Повседневная нагрузка","relax rest"],
+  ["relax","Общее расслабление","Состояние и внимание","relax rest"],
+  ["stress","Снятие напряжения и стресса","Состояние и внимание","relax rest"],
+  ["calm","Успокоение ума","Состояние и внимание","relax focus"],
+  ["awareness","Концентрация и осознанность","Состояние и внимание","focus balance"],
+  ["wake","Мягкое пробуждение","Настрой практики","mobility feet"],
+  ["evening","Вечернее замедление","Настрой практики","relax rest"]
+].map(([id,label,group,tags])=>({id,label,group,tags:tags.split(" ")}));
+
+function pose(id,name,alias,pos,motion,fn,tags,level,load,sides,cue,effect,adaptation,extra={}) {
+  return {id,baseId:id,name,alias,positions:pos.split(" "),motions:motion?motion.split(" "):[],
+    functions:fn.split(" "),tags:tags.split(" "),level,load,sides,cue,effect,adaptation,
+    equipment:["mat"],source:baseUrl+id+"/",approved:true,...extra};
+}
+
+const starter = [
+  pose("tadasana","Тадасана","Поза горы","standing","","meditate","posture feet focus whole",1,1,1,"Распределить вес по стопам. Вырасти макушкой, оставить плечи свободными.","Внимание к опоре и вертикали.","Стопы на ширине таза."),
+  pose("utkatasana","Уткатасана","Поза стула","standing","","strength","strength core feet whole",1,2,1,"Отвести таз назад и согнуть колени. Вернуться в стойку через опору стоп.","Работа ног и корпуса.","Уменьшить глубину приседания."),
+  pose("virabhadrasana-1","Вирабхадрасана I","Воин I","standing","","strength mobility","hips chest strength feet whole",2,2,2,"Встать в шаг. Согнуть переднее колено и сохранять устойчивую опору при подъёме рук.","Устойчивость в шаге и координация корпуса с руками.","Укоротить шаг и оставить руки на тазу."),
+  pose("virabhadrasana-2","Вирабхадрасана II","Воин II","standing","","strength mobility","hips feet strength balance whole",1,2,2,"Из широкой стойки развернуть переднюю стопу, согнуть колено в её направлении и раскрыть руки.","Опора ног и устойчивость в широкой стойке.","Согнуть колено меньше, держать руки на тазу."),
+  pose("trikonasana","Триконасана","Поза треугольника","standing","lateral","stretch mobility","chest legs hips back stretch whole",2,2,2,"Сохранить устойчивую широкую стойку. Вытянуться в сторону передней ноги и поставить нижнюю руку на выбранную опору.","Боковое вытяжение и работа со стойкой.","Нижняя рука выше, амплитуда меньше."),
+  pose("ardha-trikonasana-uproschennyy-variant","Ардха Триконасана","Упрощённый треугольник","standing","lateral","stretch mobility","chest legs back stretch",1,1,2,"Выполнить небольшой боковой наклон и вернуться в вертикаль через опору ног.","Боковое вытяжение с умеренной амплитудой.","Вести движение в пределах устойчивости.",{baseId:"trikonasana"}),
+  pose("vrikshasana","Врикшасана","Поза дерева","standing","standingBalance","strength meditate","balance feet focus whole",1,1,2,"Перенести вес на одну ногу. Поставить другую стопу ниже колена, смотреть в неподвижную точку.","Баланс и внимание к опорной ноге.","Оставить пальцы свободной стопы на полу."),
+  pose("virabhadrasana-3","Вирабхадрасана III","Воин III","standing","standingBalance","strength","balance core feet strength",3,3,2,"Из устойчивой стойки постепенно наклонить корпус и отвести свободную ногу назад.","Координация оси корпуса и опорной ноги.","Уменьшить наклон или выбрать более простую позу стоя."),
+  pose("ardha-uttanasana","Ардха Уттанасана","Половинный наклон","standing","forward","stretch mobility","legs back posture stretch",1,1,1,"Наклониться из тазобедренных суставов. Опора ладонями на бёдра, шея продолжает линию спины.","Вытяжение задней линии при опоре ног.","Мягко согнуть колени."),
+  pose("uttanasana","Уттанасана","Наклон стоя","standing","forward","stretch","legs stretch back",2,2,1,"Согнуться от таза с мягкими коленями. Возвращаться постепенно, опираясь на ноги.","Вытяжение задней поверхности ног.","Выбрать половинный наклон."),
+  pose("viparita-virabhadrasana","Випарита Вирабхадрасана","Обратный воин","standing","lateral","mobility stretch","chest shoulders stretch hips",2,2,2,"Сохранять опору в стойке воина. Вытянуть бок поверх передней ноги и вернуться к центру.","Боковое вытяжение грудной клетки.","Меньше амплитуда, верхняя рука ближе к корпусу."),
+  pose("Andzhanasana","Анджанасана","Низкий выпад","kneeling","","stretch mobility","hips chest mobility stretch",1,1,2,"Из опоры на колено выставить переднюю стопу. Оставить таз в удобном положении и направить корпус вверх.","Подвижность тазобедренных суставов.","Положить руки на переднее бедро, при наличии использовать подкладку."),
+  pose("Parighasana","Паригхасана","Поза ворот","kneeling","lateral","stretch mobility","chest shoulders hips stretch",2,1,2,"Опереться на одно колено и вытянуть другую ногу в сторону. Удлинить бок в небольшой амплитуде.","Боковое движение корпуса и вытяжение внутренней поверхности ноги.","Не переносить вес на вытянутую ногу."),
+  pose("mardzhariasana","Марджариасана","Поза кошки","fours hands","support","mobility","back lumbar chest mobility whole",1,1,1,"Ладони под плечами, колени под тазом. Плавно округлять спину и возвращаться в нейтраль.","Мягкое движение позвоночника с опорой.","Сократить амплитуду.",{dynamic:true}),
+  pose("mardzhariasana-2","Марджариасана II","Кошка с вытяжением","fours hands","support","mobility strength","back chest core balance",2,2,2,"Из устойчивой опоры на четвереньках вытянуть свободную конечность, удерживая корпус ровным.","Координация корпуса и опоры.","Оставить одну из вытягиваемых конечностей на полу.",{baseId:"mardzhariasana"}),
+  pose("adho-mukha-shvanasana","Адхо Мукха Шванасана","Собака мордой вниз","hands standing inverted","support","stretch strength","legs shoulders back strength stretch",2,2,1,"Из четверенек направить таз вверх и назад. Равномерно распределить давление между ладонями и стопами.","Вытяжение задней поверхности ног и работа опоры рук.","Согнуть колени и сделать положение короче."),
+  pose("balasana","Баласана","Поза ребёнка","kneeling","forward","relax rest","back lumbar hips relax rest whole",1,1,1,"Из положения на коленях направить таз назад. Подобрать положение рук и головы без усилия.","Пауза и снижение нагрузки.","При наличии положить опору под лоб или корпус."),
+  pose("sukhasana","Сукхасана","Удобная поза сидя","seated","","meditate relax","focus relax hips",1,1,2,"Сесть со свободно скрещёнными ногами. В другом подходе поменять их перекрёст.","Спокойная опора для внимания к дыханию.","Сесть выше на сложенный плед, если он есть."),
+  pose("dandasana","Дандасана","Поза посоха","seated","","strength","posture legs core focus",1,1,1,"Вытянуть ноги перед собой, сесть на седалищные кости. Сохранить вертикаль без форсирования.","Осанка и активная опора в положении сидя.","Немного согнуть колени."),
+  pose("parshva-sukhasana","Паршва Сукхасана","Боковой наклон сидя","seated","lateral","stretch mobility","chest shoulders back mobility stretch",1,1,2,"Из удобного седа удлинить один бок, вторая рука даёт лёгкую опору. Вернуться к центру.","Мягкая подвижность грудной клетки.","Сохранить опору таза и меньшую амплитуду."),
+  pose("parivritta-sukhasana","Паривритта Сукхасана","Мягкое скручивание сидя","seated","twist","mobility","chest back mobility",1,1,2,"Из устойчивого седа мягко повернуть грудную клетку. Не использовать руки как рычаг.","Работа с поворотом корпуса в удобной амплитуде.","Оставить ладони на бёдрах."),
+  pose("ardha-matsiendranasana-uproschennyy-variant","Ардха Матсиендрасана","Скручивание сидя, простой вариант","seated","twist","mobility","back chest hips mobility",2,1,2,"Устроить опору таза, вытянуть корпус и выполнить неторопливый поворот в пределах удобства.","Подвижность корпуса в скручивании.","Уменьшить поворот.",{baseId:"ardha-matsiendranasana"}),
+  pose("ardha-bhudzhangasana","Ардха Бхуджангасана","Полукобра","prone hands","backbend support","mobility strength","chest shoulders back posture",1,1,1,"Лечь на живот, опустить предплечья на коврик. Плавно приподнять грудную клетку и опуститься.","Мягкое разгибание грудной области.","Сохранять низкий подъём."),
+  pose("bhudzhangasana","Бхуджангасана","Кобра","prone hands","backbend support","strength mobility","chest shoulders back posture",2,2,1,"Из положения на животе мягко направить грудь вперёд и вверх. Вернуться вниз плавно.","Разгибание грудной области и работа мышц спины.","Выбрать низкую кобру.",{baseId:"ardha-bhudzhangasana"}),
+  pose("shalabhasana-uproschennyy-variant","Шалабхасана","Саранча, простой вариант","prone","backbend","strength","back posture strength core",2,2,1,"Лёжа на животе, вытянуться вперёд и назад. Поднять корпус на небольшую высоту и плавно опуститься.","Работа мышц задней поверхности тела.","Укоротить удержание и амплитуду.",{baseId:"shalabhasana"}),
+  pose("Makarasana","Макарасана","Мягкий отдых в позе крокодила","prone","","relax rest","relax rest back",1,1,1,"Расположиться на животе, устроить опору головы на предплечьях, дать плечам опуститься.","Спокойная пауза лёжа на животе.","Повернуть голову удобно, не форсируя положение."),
+  pose("setu-bandhasana","Сету Бандхасана","Полумост","supine","backbend","strength mobility","chest hips core strength",1,2,1,"Лёжа на спине согнуть ноги и приподнять таз через опору стоп. Опуститься плавно.","Координация опоры стоп, таза и корпуса.","Выполнить меньший подъём.",{dynamic:true}),
+  pose("eka-pada-pavana-muktasana","Эка Пада Павана Муктасана","Колено к корпусу","supine","","mobility relax","hips lumbar back relax",1,1,2,"Лёжа на спине приблизить одно согнутое колено. Сохранить свободное дыхание и поменять сторону.","Мягкое движение в тазобедренном суставе.","Держать бедро сзади и уменьшить сгибание."),
+  pose("supta-baddha-konasana","Супта Баддха Конасана","Связанный угол лёжа","supine","","stretch relax rest","hips relax rest stretch",1,1,1,"Лёжа на спине соединить стопы. Позволить коленям разойтись в удобном диапазоне.","Спокойная пауза с вниманием к области таза.","При наличии использовать опоры под бёдра."),
+  pose("supta-matsiendrasana","Супта Матсиендрасана","Скручивание лёжа","supine","twist","mobility relax","chest lumbar back relax",1,1,2,"Лёжа на спине направить согнутые ноги в сторону без нажима. Вернуться к центру и повторить в другую сторону.","Мягкий поворот корпуса ближе к завершению.","Подложить опору при наличии или уменьшить движение."),
+  pose("anantasana","Анантасана","Поза на боку","side","","strength","balance core hips",2,2,2,"Устроить устойчивую опору на боку. Работать верхней ногой в доступной амплитуде.","Устойчивость корпуса и внимание к опоре на боку.","Согнуть верхнюю ногу и не стремиться к захвату стопы."),
+  pose("supta-padangushthasana-1","Супта Падангуштхасана I","Вытяжение ноги лёжа","supine","","stretch mobility","legs hips stretch",1,1,2,"Из положения на спине направить ногу вверх, удерживая её ремнём в комфортном диапазоне.","Вытяжение задней поверхности ноги при опоре корпуса.","Согнуть поднимаемую ногу.",{equipment:["mat","strap"]}),
+  pose("viparita-karani-mudra","Випарита Карани","Перевёрнутое положение","inverted","support","rest","relax rest",3,3,1,"Работать только с подходящим вариантом после проверки преподавателем.","Отдельная поза из каталога.","Выбрать доступный отдых без переворачивания.",{approved:false}),
+  pose("adho-mukha-vrikshasana","Адхо Мукха Врикшасана","Стойка на руках","hands inverted","armBalance support","strength","balance core shoulders strength",3,3,1,"К планированию допускается только после проверки методики преподавателем.","Продвинутый баланс на руках.","Подобрать другой баланс по уровню.",{approved:false}),
+  pose("shavasana","Шавасана","Поза отдыха","supine","","relax rest meditate","relax rest focus",1,1,1,"Устроиться в удобном положении. Оставить дыхание естественным, постепенно перевести внимание к точкам опоры.","Завершающий отдых.","При наличии поместить опору под колени.")
+];
+
+
+
+const sourceSun = "https://www.oum.ru/yoga/asany/surya-namaskar-privetstvie-solntsa/";
+const sourceSafety = "https://www.nccih.nih.gov/health/yoga-effectiveness-and-safety";
+const sourceBeginners = "https://www.oum.ru/yoga/osnovy-yogi/top-40-uprazhneniy-yogi-dlya-nachinayushchikh/";
+const diagramPaths = {
+  tadasana:'<circle cx="36" cy="12" r="4"/><path d="M36 16v20m-7-15 7-2 7 2m-14 0-2 15m16-15 2 15m-9 0-4 14h-4m8-14 4 14h4M20 53h32"/>',
+  shavasana:'<circle cx="14" cy="32" r="4"/><path d="M19 32h25m-18 0-6-7-2-1m8 8-6 7-2 1m26-8 14-5 3-2m-17 7 14 5 3 2M9 45h55"/>'
+};
+
+const more = [
+  pose("badhakonasana","Баддха Конасана","Связанный угол сидя","seated","","stretch mobility","hips stretch mobility",1,1,1,"Сесть, соединить стопы и дать коленям опуститься в доступном диапазоне.","Подвижность таза.","При наличии положить блоки или пледы под бёдра."),
+  pose("Dzhanu-Shirshasana","Джану Ширшасана","Наклон к вытянутой ноге, мягкий вариант","seated","forward","stretch","legs hips stretch back",1,1,2,"Оставить одну ногу впереди, вторую согнуть. Наклониться от таза до комфортной амплитуды.","Вытяжение задней поверхности ноги.","Смягчить колено вытянутой ноги или остаться в вертикали."),
+  pose("pashimotanasana-light","Пашчимоттанасана","Неглубокий наклон сидя","seated","forward","stretch","legs stretch back",1,1,1,"Сесть с вытянутыми или мягко согнутыми ногами. Наклониться от таза, оставляя спину длинной.","Работа с наклоном.","Уменьшить амплитуду, не подтягивать себя за стопы."),
+  pose("parivritta-dzhanu-shirshasana-uproschennaya-variaciya-bez-glubokogo-naklona","Паривритта Джану Ширшасана","Боковое вытяжение с поворотом, мягкий вариант","seated","twist lateral","mobility","chest back shoulders mobility",1,1,2,"Оставить одну ногу впереди, вторую согнуть. Из устойчивого седа мягко повернуть корпус и вытянуть бок. Вернуться к центру и поменять сторону.","Подвижность грудной клетки.","Остаться почти вертикально, без захвата стопы."),
+  pose("sukha-navasana","Сукха Навасана","Упрощённая лодка","seated","standingBalance","strength","core strength balance energy",2,2,1,"Сесть с согнутыми коленями. Найти равновесие на седалищных костях, плавно перенести вес назад и вернуться.","Работа с равновесием и корпусом.","Оставить стопы на коврике."),
+  pose("pavana-muktasana","Павана Муктасана","Оба колена к корпусу","supine","","relax mobility","lumbar hips relax mobility",1,1,1,"Лёжа на спине, приблизить согнутые ноги и мягко удерживать их. Возвратить стопы на коврик по очереди.","Спокойное движение перед отдыхом.","Оставить голову на коврике, уменьшить амплитуду."),
+  pose("supta-sukhasana","Супта Сукхасана","Удобная поза лёжа","supine","","relax rest","hips relax rest",1,1,1,"Лёжа на спине, удобно скрестить голени. Поменять перекрёст в следующем подходе.","Спокойная пауза.","Выбрать согнутые колени со стопами на коврике, если перекрёст неудобен."),
+  pose("side-rest","","Отдых лёжа на боку","side","","relax rest","relax rest",1,1,2,"Устроить голову на удобной опоре, мягко согнуть ноги. При необходимости поменять сторону.","Вариант отдыха.","При наличии проложить плед между коленями.",{source:sourceSafety,variation:true}),
+  pose("viparita-karani-wall","Випарита Карани","Ноги у стены, мягкий вариант","supine inverted","","relax rest","relax rest legs",2,1,1,"Выбрать удобное расстояние от стены. Согнуть ноги перед выходом, повернуться на бок.","Спокойная поддержанная поза.","Требуется доступная стена.",{baseId:"viparita-karani-mudra",source:sourceBeginners,equipment:["mat","wall"],variation:true})
+];
+
+const spelling = {tadasana:"ताडासन",balasana:"बालासन",shavasana:"शवासन",sukhasana:"सुखासन",utkatasana:"उत्कटासन",vrikshasana:"वृक्षासन",dandasana:"दण्डासन",bhudzhangasana:"भुजङ्गासन",uttanasana:"उत्तानासन"};
+const variantIds = new Set(["ardha-trikonasana-uproschennyy-variant","ardha-matsiendranasana-uproschennyy-variant",
+  "parshva-sukhasana","parivritta-sukhasana","Makarasana","parivritta-dzhanu-shirshasana-uproschennaya-variaciya-bez-glubokogo-naklona","Dzhanu-Shirshasana","pashimotanasana-light",
+  "mardzhariasana","setu-bandhasana","pavana-muktasana","sukha-navasana","anantasana","ardha-bhudzhangasana"]);
+const essentialWrist = new Set(["adho-mukha-shvanasana","mardzhariasana","mardzhariasana-2","bhudzhangasana",
+  "adho-mukha-vrikshasana","trikonasana","parshva-sukhasana","dandasana"]);
+const props = {tadasana:["стена"],vrikshasana:["стена"],balasana:["плед","болстер"],sukhasana:["плед"],shavasana:["плед","болстер"],
+  trikonasana:["блок"],Andzhanasana:["плед"],"badhakonasana":["блок","плед"],"supta-baddha-konasana":["блок","болстер","плед"],
+  "supta-matsiendrasana":["плед"],"side-rest":["плед"],"supta-padangushthasana-1":["ремень"],"viparita-karani-wall":["стена"]};
+
+const poses = [...starter,...more].filter(a=>a.approved).map(a=>{
+  const position=a.id==="adho-mukha-shvanasana"?"fours":a.positions.find(key=>key!=="inverted"&&key!=="hands");
+  const types=[
+    ...a.motions.flatMap(m=>({forward:["bend","forward"],lateral:["bend","lateral"],backbend:["backbend"],twist:["twist"],standingBalance:["balance"],armBalance:["balance"]})[m]||[]),
+    ...(a.functions.includes("rest")?["rest"]:[]), ...(a.positions.includes("inverted")?["inverted"]:[])
+  ];
+  const requirements=a.equipment.filter(x=>x!=="mat");
+  return {id:a.id,baseId:a.baseId,name:a.name,alias:a.alias,
+    sanskrit:spelling[a.id],position,types,load:a.load,level:a.level,sides:a.sides,
+    dynamic:a.dynamic||["pavana-muktasana","eka-pada-pavana-muktasana"].includes(a.id),
+    tags:[...a.tags,...(a.load>1?["energy"]:[]),...(a.functions.includes("relax")?["mood"]:[])],
+    cue:a.cue,variant:a.adaptation,variantShown:a.variation||variantIds.has(a.id),thumbnail:diagramPaths[a.id]?a.id:null,
+    source:a.source,
+    wrist:essentialWrist.has(a.id),requirements,supports:props[a.id]||[],
+    restrictions:[...(essentialWrist.has(a.id)?["wrist"]:[]),position,...types]
+  };
+});
+
+const focusGroups = [
+  ["Спина и верх тела",["back","lumbar","chest","neck","posture","desk"]],
+  ["Подвижность и физическая подготовка",["stretch","hips","strength","balance"]],
+  ["Самочувствие",["relax","mood","energy"]],
+  ["Общая практика",["whole","custom"]]
+];
+const labels = {...Object.fromEntries(defaultGoals.map(g=>[g.id,g.label])),
+  whole:"Сбалансированная практика для всего тела", neck:"Шея и плечи", desk:"Мягкое движение после сидячего дня",
+  relax:"Расслабление и снижение напряжения", mood:"Мягкая практика для настроения",energy:"Бодрящая практика",custom:"Свой акцент"};
+const goals = Object.fromEntries(focusGroups.flatMap(([,ids])=>ids.map(id=>[id,labels[id]])));
+const focusTags = {...Object.fromEntries(defaultGoals.map(g=>[g.id,g.tags])), whole:[], mood:["mood","relax"],energy:["energy","strength"]};
+
+const positionLabels={standing:"Стоя",seated:"Сидя",supine:"Лёжа на спине",prone:"Лёжа на животе",side:"Лёжа на боку",kneeling:"На коленях",fours:"На четвереньках"};
+const typeLabels={twist:"Скрутки",bend:"Наклоны",backbend:"Прогибы",balance:"Балансы",rest:"Асаны отдыха",inverted:"Перевёрнутые положения"};
+const levelLabels={basic:"Начинающий",intermediate:"Средний",advanced:"Опытный",mixed:"Смешанный"};
+const formatLabels={group:"Групповое занятие",personal:"Персональное занятие"};
+const compositionLabels={group:{unspecified:"Не указан",mixed:"Смешанная группа",women:"Женская группа",men:"Мужская группа"},
+  personal:{unspecified:"Не указан",woman:"Женщина",man:"Мужчина"}};
+const warmLabels={sun:"Сурья Намаскар",joints:"Суставная гимнастика"};
+const finalLabels={supine:"Шавасана на спине",side:"Расслабление лёжа на боку",seated:"Расслабление сидя",chair:"Расслабление на стуле"};
+const blockLabels={warm:"Разминка",main:"Основная часть",final:"Шавасана и финальное расслабление"};
+
+return {baseUrl,sourceSun,sourceSafety,sourceBeginners,diagramPaths,poses,focusGroups,goals,focusTags,positionLabels,typeLabels,levelLabels,formatLabels,compositionLabels,warmLabels,finalLabels,blockLabels};
+})();
+const __engine=(()=>{
+const {poses, goals, focusTags, sourceSun, finalLabels, formatLabels, compositionLabels, levelLabels,
+  warmLabels, blockLabels, positionLabels, typeLabels}=__catalog;
+
+const byId = new Map(poses.map(pose => [pose.id, pose]));
+const blocks = Object.keys(blockLabels);
+const lying = ["supine","prone","side"];
+const ageOptions = ["30–40","40–50","50–60","60+",""];
+const defaults = {
+  goal:"whole", custom:"", format:"group", composition:"unspecified", age:"", level:"basic", duration:60,
+  warmup:"sun", warmMinutes:10, savasana:10, final:"supine", positions:[], types:[], limits:"", equipment:"", soft:false
+};
+const integer = (v,min,max) => Number.isInteger(v) && v>=min && v<=max;
+const listed = (v, options) => Object.hasOwn(options,v);
+const word = v => String(v ?? "").toLowerCase().replaceAll("ё","е");
+const clock = seconds => [Math.floor(seconds/60),seconds%60].map(n=>String(n).padStart(2,"0")).join(":");
+function period(seconds) {
+  const m=Math.floor(seconds/60), s=seconds%60;
+  if (!m) return s+" с";
+  return m+" мин"+(s?" "+s+" с":"");
+}
+const titleOf = p => p.goal==="custom"?p.custom:goals[p.goal];
+const poseTitle = pose => [pose.name,pose.alias].filter(Boolean).join(" · ");
+const rowTitle = row => row.block==="main"?poseTitle(byId.get(row.id)):row.title;
+function fields(p) {
+  return [
+    ["Формат",formatLabels[p.format]],["Состав",compositionLabels[p.format][p.composition]],
+    [p.format==="group"?"Примерный возраст":"Возраст",p.age?p.age+" лет":"Не указан"],
+    ["Уровень",levelLabels[p.level]],["Класс",period(p.duration*60)],
+    ["Разминка",warmLabels[p.warmup]+" · "+period(p.warmMinutes*60)],
+    ["Шавасана",finalLabels[p.final]+" · "+period(p.savasana*60)],
+    ["Положения",p.positions.length?p.positions.map(x=>positionLabels[x]).join(", "):"Все"],
+    ["Виды",p.types.length?p.types.map(x=>typeLabels[x]).join(", "):"Все"],
+    ["Ограничения",p.limits||"Не указаны"],["Инвентарь",p.equipment||"Не указан"],
+    ...(p.soft?[["Нагрузка","Мягкая"]]:[])
+  ];
+}
+const restrictions = {
+  wrist:"без опоры на кисти",supine:"без положения на спине",prone:"без положения на животе",
+  side:"без положения на боку",standing:"без положений стоя",seated:"без положений сидя",
+  kneeling:"без опоры на колени",fours:"без положения на четвереньках",
+  bend:"без наклонов",forward:"без наклонов вперёд",lateral:"без боковых наклонов",
+  backbend:"без прогибов",twist:"без скруток",balance:"без балансов",inverted:"без перевёрнутых положений"
+};
+const rules = [
+  [/кист|запяст|ладон|опор.{0,12}рук|нагрузк.{0,12}рук/u,["wrist"]],
+  [/живот/u,["prone"]],[/спин/u,["supine"]],[/боку|бок[еау]м/u,["side"]],
+  [/четверен/u,["fours"]],[/на колен|опор.{0,12}колен|коленях/u,["kneeling","fours"]],
+  [/стоят|стоя|встават|подъем.{0,12}пол/u,["standing"]],[/сидя|сидет/u,["seated"]],
+  [/скрутк|скручиван/u,["twist"]],[/прогиб/u,["backbend"]],
+  [/наклон.{0,14}вперед/u,["forward"]],[/боков.{0,10}наклон/u,["lateral"]],
+  [/наклон/u,["bend"]],[/баланс|равновес/u,["balance"]],[/перевернут/u,["inverted"]],
+  [/лежа|лежат|ложит/u,lying]
+];
+const propRules = {wall:/стен/u,strap:/рем(ень|н)|лент/u,chair:/стул/u,blocks:/блок|кирпич/u,blanket:/плед/u,bolster:/болстер/u};
+
+function conditions(p) {
+  const blocked=new Set(), unknown=[];
+  const limit=/без\s|нельзя|неудоб|запрет|избег|исключ|противопоказ|не (?:встав|лож|леж|сто|сид|опира|нагруж|выполня)|нежелат|не могу/u;
+  const chunks=word(p.limits).split(/[\n;,]/u).map(v=>v.trim()).filter(Boolean);
+  for (const chunk of chunks) {
+    const clauses=chunk.split(/\s+(?:и|или)\s+/u);
+    const hasLimit=limit.test(chunk);
+    for (const clause of clauses) {
+      const bodyPosition=/леж|ложит|положен|на (?:спин|живот|бок)/u.test(clause);
+      const match=rules.find(([pattern,codes])=>pattern.test(clause)&&
+        (bodyPosition||!lying.includes(codes[0])));
+      if (match&&hasLimit&&!/можно|удобно без ограничен/u.test(clause.replace(/неудобно/gu,""))) {
+        match[1].forEach(code=>blocked.add(code));
+      } else unknown.push(clause);
+    }
+  }
+  const supplied=new Set();
+  for (const part of word(p.equipment).split(/[\n;,]|\s+и\s+/u)) {
+    if (/(?:^|\s)нет(?:\s|$)|без\s|отсутств/u.test(part)) continue;
+    for (const [key,pattern] of Object.entries(propRules)) if (pattern.test(part)) supplied.add(key);
+  }
+  return {blocked,unknown,supplied};
+}
+const rank = {basic:1, mixed:1, intermediate:2, advanced:3};
+function isAllowed(pose,p,context=conditions(p)) {
+  return !!pose&&pose.id!=="shavasana"&&pose.level<=rank[p.level]&&(!p.soft||pose.load===1)&&
+    (!pose.types.includes("inverted")||rank[p.level]>=2)&&
+    !pose.restrictions.some(code=>context.blocked.has(code))&&
+    pose.requirements.every(prop=>context.supplied.has(prop))&&
+    (!p.positions.length||p.positions.includes(pose.position))&&
+    (!p.types.length||pose.types.some(type=>p.types.includes(type)));
+}
+function candidates(p) {
+  const context=conditions(p);
+  return poses.filter(pose=>isAllowed(pose,p,context));
+}
+const floorOrder=["standing","seated","kneeling","fours","prone","side","supine"];
+const floorEnding=["standing","kneeling","fours","prone","side","supine","seated"];
+const sequenceOf = p => (["seated","chair"].includes(p.final)?floorEnding:floorOrder);
+const restPosition = p => p.final==="chair"?"seated":p.final;
+function hasFloorClass(p,context=conditions(p)) {
+  return (p.positions.length>0&&!p.positions.includes("standing")) || context.blocked.has("standing") ||
+    (p.types.length>0 && !candidates(p).some(pose=>pose.position==="standing"));
+}
+function warmConflict(p,context) {
+  if (p.warmup!=="sun") return "";
+  if (hasFloorClass(p,context)) return "Обычный комплекс Сурья Намаскар включает положения стоя. Для этого класса выберите суставную гимнастику без подъёма с коврика.";
+  const codes=["wrist","prone","kneeling","fours","bend","forward","backbend","inverted"].filter(x=>context.blocked.has(x));
+  if (codes.length) return "Сурья Намаскар конфликтует с условием «"+restrictions[codes[0]]+"». Выберите суставную гимнастику.";
+  return "";
+}
+function availableFinal(p,context) {
+  return Object.keys(finalLabels).filter(key=>!context.blocked.has(key==="chair"?"seated":key)&&
+    (key!=="chair"||context.supplied.has("chair")));
+}
+function advice(p) {
+  const context=conditions(p), notes=[];
+  const warm=warmConflict(p,context);
+  if (warm) notes.push({kind:"warm",text:warm,option:"joints"});
+  const allowedFinal=availableFinal(p,context);
+  if (!allowedFinal.includes(p.final)) {
+    const option=allowedFinal.find(v=>v==="seated")||allowedFinal[0];
+    notes.push({kind:"final",option,text:option?
+      "Выбранное положение финального отдыха недоступно. Подойдёт «"+finalLabels[option]+"» на те же "+p.savasana+" мин, если его подтвердит преподаватель.":
+      "Не осталось доступных положений для финального отдыха. Уточните допустимую позу и опоры."});
+  }
+  if (context.unknown.length) {
+    notes.push({kind:"review",text:"Часть условий не удалось применить автоматически. Проверьте сочетание этих условий с каждой позой и замените сомнительные элементы из каталога."});
+  }
+  if (context.blocked.size) notes.push({kind:"applied",text:"Подбор учитывает следующие условия · "+[...context.blocked].map(x=>restrictions[x]).join(", ")+"."});
+  return notes;
+}
+function issues(p) {
+  const errors=[];
+  if (!listed(p.goal,goals)||(p.goal==="custom"&&!p.custom.trim())) errors.push("Введите свой акцент или выберите тему из списка.");
+  if (!listed(p.format,formatLabels)||!listed(p.composition,compositionLabels[p.format]??{})||
+    !listed(p.level,levelLabels)||!ageOptions.includes(p.age)) errors.push("Проверьте параметры аудитории.");
+  if (![60,90].includes(p.duration)||![5,10,15,20].includes(p.savasana)||!integer(p.warmMinutes,4,30)) {
+    errors.push("Выберите 60 или 90 минут, разминку от 4 до 30 минут и Шавасану 5, 10, 15 или 20 минут.");
+  }
+  if (!listed(p.warmup,warmLabels)||!listed(p.final,finalLabels)) errors.push("Выберите разминку и положение финального отдыха.");
+  return [...errors,...advice(p).filter(x=>x.kind==="warm"||x.kind==="final").map(x=>x.text)];
+}
+const warmCues = {
+  standing:["Начните в устойчивой стойке. Сделайте небольшие движения плечами и кистями.",
+    "Поочерёдно разгружайте стопы и мягко сгибайте колени в доступном диапазоне.",
+    "Сохраняйте устойчивую опору. Чередуйте движения стоп и плеч, постепенно увеличивая темп."],
+  seated:["Сядьте устойчиво на коврике. Сделайте небольшие движения плечами и локтями.",
+    "Оставьте таз на коврике. По очереди выпрямляйте ноги в удобном диапазоне и двигайте стопами.",
+    "Оставаясь сидя, чередуйте мягкие движения стоп, локтей и плеч в удобном темпе."],
+  supine:["Лёжа на спине, устройте голову и таз удобно. Спокойно согните и разогните руки.",
+    "Оставаясь на спине, поочерёдно сгибайте ноги или скользите пятками по коврику.",
+    "Чередуйте движения голеностопа и локтей, постепенно увеличивая темп."],
+  side:["Лягте на бок с удобной опорой под головой. Мягко двигайте локтем верхней руки.",
+    "На боку выполняйте небольшие движения верхней стопой и ногой.",
+    "Чередуйте мягкие движения рук и ног. При доступности выполните в обе стороны."],
+  prone:["Лёжа на животе, удобно расположите голову и расслабьте плечи.",
+    "Мягко сгибайте и разгибайте стопы или колени в доступной амплитуде.",
+    "Сохраняя опору корпуса, чередуйте движения кистями и стопами в небольшом диапазоне."],
+  kneeling:["Останьтесь на коленях с удобной опорой. Мягко согните и выпрямите локти.",
+    "Медленно перенесите вес вперёд и назад на небольшое расстояние.",
+    "Чередуйте движения плечами и небольшой перенос веса."],
+  fours:["На четвереньках подберите удобную опору, сохраняя нейтральное положение спины.",
+    "Медленно переносите вес между руками и коленями на небольшое расстояние.",
+    "Чередуйте небольшие переносы веса без удержания крайних положений."]
+};
+function warmRows(p,pose) {
+  const seconds=p.warmMinutes*60;
+  if (p.warmup==="sun") {
+    const prep=Math.round(seconds/5), cool=Math.round(seconds/5);
+    const rounds=Math.min(10,Math.max(2,Math.round((seconds-prep-cool)/180)*2));
+    return [
+      {block:"warm",id:"sun-prep",key:"sun-prep",title:"Подготовка к Приветствию солнцу",seconds:prep,position:"standing",repeats:8,cue:"Распределите вес по стопам. Попробуйте небольшие движения рук и мягкое сгибание коленей."},
+      {block:"warm",id:"sun-rounds",key:"sun-rounds",title:"Сурья Намаскар · Приветствие солнцу",seconds:seconds-prep-cool,position:"standing",repeats:rounds, source:sourceSun,
+        cue:"Стойка с ладонями у груди → руки вверх → наклон → шаг назад в выпад → Собака мордой вниз → опускание через колени → низкая кобра → Собака мордой вниз → выпад вперёд → наклон → подъём рук → стойка. Меняйте ведущую ногу в каждом круге. Дышите естественно, без задержек и глубокого прогиба. При необходимости делайте паузы между кругами."},
+      {block:"warm",id:"sun-exit",key:"sun-exit",title:"Восстановление дыхания",seconds:cool,position:"standing",cue:"Вернитесь в устойчивую стойку. Дайте дыханию выровняться. Плавно переходите к первому положению основной части."}
+    ];
+  }
+  const position=hasFloorClass(p)?pose.position:(conditions(p).blocked.has("standing")?pose.position:"standing");
+  const a=Math.round(seconds*.30), b=Math.round(seconds*.36);
+  return ["Суставная гимнастика · начало","Суставная гимнастика · смена движений","Суставная гимнастика · подготовка к основной части"].map((title,i)=>({
+    block:"warm",id:"joints-"+i,key:"joints-"+i,title,position,seconds:[a,b,seconds-a-b][i],repeats:seconds>=540?10:6,cue:warmCues[position][i]
+  }));
+}
+function finalRow(p) {
+  const pose=byId.get("shavasana");
+  const cue={supine:pose.cue+" Возвращайтесь к движению медленно.",side:"Лягте на выбранный бок. Устройте голову и ноги удобно. Дышите естественно, затем плавно вернитесь к движению.",
+    seated:"Сядьте на коврик в устойчивое удобное положение. Расслабьте плечи, верните внимание к опоре и дыханию.",
+    chair:"Сядьте на устойчивый стул, обе стопы на полу. Дайте плечам опуститься. Вернитесь к движению постепенно."};
+  return {block:"final",id:p.final==="supine"?"shavasana":"rest-"+p.final,key:"final",title:finalLabels[p.final],
+    seconds:p.savasana*60,position:restPosition(p),cue:cue[p.final],source:p.final==="supine"?pose.source:null,
+    thumbnail:p.final==="supine"?pose.thumbnail:null};
+}
+function bounds(pose) {
+  const min=pose.sides===2?60:45;
+  const max=pose.dynamic?150:pose.types.includes("rest")?155:pose.load>=2?120:140;
+  return {min,max};
+}
+function suggested(pose) {
+  return pose.sides===2?95:85;
+}
+function makeMain(id,key,seconds) {
+  return {block:"main",id,key,seconds:seconds??suggested(byId.get(id))};
+}
+function sortSequence(items,p) {
+  const order=sequenceOf(p);
+  return items.sort((a,b)=>order.indexOf(a.position)-order.indexOf(b.position)||
+    Number(a.types.includes("rest"))-Number(b.types.includes("rest"))||a.load-b.load);
+}
+const aliases = {chest:/грудн/u,lumbar:/поясниц/u,back:/спин/u,neck:/ше|плеч/u,hips:/тазобедр|таз/u,
+  strength:/сил|устойчив/u, stretch:/растяж|гибк/u, balance:/баланс|координац/u,relax:/расслаб|напряж/u,
+  energy:/бодр|энерг/u, posture:/осанк/u};
+function targetTags(p) {
+  if (p.goal!=="custom") return focusTags[p.goal]||[];
+  const detected=Object.entries(aliases).filter(([, re])=>re.test(word(p.custom))).map(([id])=>id);
+  return [...new Set(detected.flatMap(id=>focusTags[id]||[]))];
+}
+function distribute(rows,target) {
+  const filled=rows.map(r=>{
+    const {min,max}=bounds(byId.get(r.id));
+    return {...r,seconds:Math.min(max,Math.max(min,r.seconds))};
+  });
+  let delta=target-filled.reduce((sum,r)=>sum+r.seconds,0);
+  while (delta) {
+    const sign=Math.sign(delta);
+    const adjustable=filled.filter(r=>{
+      const {min,max}=bounds(byId.get(r.id));
+      return sign>0?r.seconds<max:r.seconds>min;
+    });
+    if (!adjustable.length) return null;
+    const step=Math.max(1,Math.floor(Math.abs(delta)/adjustable.length));
+    for (const r of adjustable) {
+      const {min,max}=bounds(byId.get(r.id));
+      const change=Math.min(Math.abs(delta),step,sign>0?max-r.seconds:r.seconds-min);
+      r.seconds+=sign*change;
+      delta-=sign*change;
+    }
+  }
+  return filled;
+}
+function chooseSequence(pool,p,target,variant) {
+  const tags=targetTags(p);
+  const score=a=>tags.filter(tag=>a.tags.includes(tag)).length;
+  const desired=Math.max(1,Math.round(target/96));
+  const phaseCounts=new Map(), poseCounts=new Map(), selected=[];
+  const offset=pool.length?(variant*5)%pool.length:0;
+  const rotated=[...pool.slice(offset),...pool.slice(0,offset)];
+  let min=0,max=0;
+  while ((selected.length<desired || max<target) && selected.length<75) {
+    const next=rotated.filter(a=>(poseCounts.get(a.baseId)||0)<4&& min+bounds(a).min<=target).reduce((best,a)=>{
+      const value=pose=>score(pose)*4-(poseCounts.get(pose.baseId)||0)*8-(phaseCounts.get(pose.position)||0)*1.1
+        +(pose===selected.at(-1)?-9:0)+(p.soft?-pose.load:0);
+      return !best||value(a)>value(best)?a:best;
+    },null);
+    if (!next) break;
+    selected.push(next);
+    poseCounts.set(next.baseId,(poseCounts.get(next.baseId)||0)+1);
+    phaseCounts.set(next.position,(phaseCounts.get(next.position)||0)+1);
+    min+=bounds(next).min;
+    max+=bounds(next).max;
+  }
+  if (max<target||!selected.length) return null;
+  // Keep position changes local, then cycle variants inside each position and load band.
+  const groups=new Map();
+  for (const item of sortSequence(selected,p)) {
+    const key=item.position+"-"+Number(item.types.includes("rest"))+"-"+item.load;
+    if (!groups.has(key)) groups.set(key,new Map());
+    const group=groups.get(key);
+    group.set(item.id,(group.get(item.id)||0)+1);
+  }
+  const ordered=[];
+  for (const group of groups.values()) {
+    while (group.size) for (const [id,count] of group) {
+      ordered.push(id);
+      if (count===1) group.delete(id); else group.set(id,count-1);
+    }
+  }
+  return distribute(ordered.map((id,i)=>makeMain(id,"pose-"+i)),target);
+}
+const budget = p => (p.duration-p.warmMinutes-p.savasana)*60;
+function generate(p,variant=0) {
+  const errors=issues(p);
+  if (budget(p)<120) errors.push("Оставьте хотя бы 2 минуты основной части. Сократите разминку или выберите 90 минут.");
+  if (errors.length) return {error:errors.join(" ")};
+  const pool=candidates(p);
+  const main=chooseSequence(pool,p,budget(p),variant);
+  if (!main) {
+    const hint=p.types.length?"Добавьте вид асан или сбросьте список видов.":p.positions.length?
+      "Добавьте ещё одно допустимое положение или сбросьте список положений.":"Проверьте уровень и условия, сократите класс или увеличьте время разминки либо Шавасаны.";
+    return {error:"Подходящих асан: "+pool.length+". Их недостаточно для основной части на "+period(budget(p))+" при допустимом числе подходов. "+hint};
+  }
+  const reviewNotes=advice(p).filter(x=>x.kind==="review").map(x=>x.text);
+  if (p.goal==="custom"&&!targetTags(p).length) reviewNotes.push("Свой акцент сохранён в шапке. Подбор опирается на общую практику. Уточните выбор асан вручную.");
+  else if (targetTags(p).length&&!pool.some(a=>targetTags(p).some(tag=>a.tags.includes(tag)))) {
+    reviewNotes.push("В выбранных фильтрах нет асан с метками этого акцента. Проверьте план или расширьте фильтры.");
+  }
+  const plan={params:structuredClone(p),variant,reviewNotes, rows:[...warmRows(p,byId.get(main[0].id)),...main,finalRow(p)]};
+  const checked=inspect(plan);
+  return checked.errors.length?{error:checked.errors.join(" ")}:{plan};
+}
+function inspect(plan) {
+  const p=plan.params, context=conditions(p), errors=issues(p);
+  const totals={warm:0,main:0,final:0};
+  let total=0, last=0;
+  const keys=new Set();
+  const timeline=plan.rows.map(row=>{
+    const i=blocks.indexOf(row.block);
+    const start=total;
+    if (i<0||i<last||keys.has(row.key)||!integer(row.seconds,1,2400)) {
+      errors.push("В программе есть недопустимая строка времени или нарушен порядок блоков.");
+    } else {
+      totals[row.block]+=row.seconds;
+      total+=row.seconds;
+    }
+    last=i; keys.add(row.key);
+    if (row.block==="main") {
+      const pose=byId.get(row.id);
+      if (!isAllowed(pose,p,context)) errors.push("Асана «"+(pose?poseTitle(pose):row.id)+"» конфликтует с параметрами.");
+      if (pose) {
+        const {min,max}=bounds(pose);
+        if (!integer(row.seconds,min,max)) errors.push("Уточните время для «"+pose.name+"».");
+      }
+    }
+    return {...row,start,end:total};
+  });
+  if (!totals.main) errors.push("Добавьте асану в основную часть.");
+  if (totals.warm!==p.warmMinutes*60||totals.final!==p.savasana*60||plan.rows.filter(row=>row.block==="final").length!==1) {
+    errors.push("Время разминки и финального отдыха должно соответствовать параметрам.");
+  }
+  return {timeline,totals,total,delta:p.duration*60-total,errors:[...new Set(errors)]};
+}
+function redistribute(plan) {
+  const p=plan.params;
+  const filled=distribute(plan.rows.filter(r=>r.block==="main"),budget(p));
+  if (!filled) return {error:"Текущие асаны нельзя уложить в заданное время. Добавьте или уберите несколько строк основной части."};
+  const rows=plan.rows.map(r=>r.block==="main"?filled.find(v=>v.key===r.key):r);
+  const next={...plan,rows};
+  const checked=inspect(next);
+  return checked.errors.length?{error:checked.errors.join(" ")}:{plan:next};
+}
+function rowPosition(row) {
+  return row?.block==="main"?byId.get(row.id).position:row?.position;
+}
+function rowDetails(row,next,p) {
+  const change=Boolean(next&&rowPosition(next)!==rowPosition(row));
+  if (row.block!=="main") {
+    const transition=change?20:10;
+    let text="Практика "+period(row.seconds-transition);
+    if (row.id==="sun-rounds") text=row.repeats+" круга, по "+row.repeats/2+" с каждой ведущей ногой · "+period(row.seconds-transition);
+    else if (row.repeats) text="Ориентир "+row.repeats+" повторов на движение · "+period(row.seconds-transition);
+    return {title:row.title,position:rowPosition(row),source:row.source,thumbnail:row.thumbnail,cue:row.cue,
+      timing:row.block==="final"?period(row.seconds)+" в выбранном положении":
+        text+" + "+transition+" с на вход, выход и переходы = "+period(row.seconds)};
+  }
+  const a=byId.get(row.id), entrance=5, exit=change?17:7, switchSides=a.sides===2?5:0;
+  const available=row.seconds-entrance-exit;
+  const repsMax=a.dynamic?12:(a.types.includes("rest")?1:3);
+  const holdMax=a.dynamic?8:a.types.includes("rest")?145:a.load>=2?32:p.soft?35:46;
+  const unitGoal=a.dynamic?6:a.types.includes("rest")?holdMax:p.soft?25:34;
+  const repeats=Math.max(1,Math.min(repsMax,Math.ceil((available-switchSides)/(a.sides*unitGoal+switchSides+4))));
+  const pauses=4*(repeats-1);
+  const per=Math.max(1,Math.min(holdMax,Math.floor((available-pauses-switchSides*repeats)/(a.sides*repeats))));
+  const transition=row.seconds-per*repeats*a.sides;
+  const time=a.dynamic?[repeats+" повт. × "+per+" с",a.sides===2?"на сторону":""].filter(Boolean).join(" "):
+    a.sides===2?(repeats>1?repeats+" подхода по ":"")+"("+per+" с справа + "+per+" с слева)":
+    (repeats>1?repeats+" подхода × ":"")+per+" с "+(a.types.includes("rest")?"отдыха":"удержания");
+  const exitNote=change?" Плавно перейдите в положение «"+positionLabels[rowPosition(next)]?.toLowerCase()+"».":"";
+  const mixed=p.level==="mixed"||p.level==="basic"||p.soft;
+  return {title:poseTitle(a),sanskrit:a.sanskrit,position:a.position,thumbnail:a.thumbnail,source:a.source,
+    cue:a.cue+exitNote,variant:(mixed||a.variantShown)?a.variant:"",supports:a.supports.join(", "),
+    timing:time+" + "+transition+" с на вход, выход, переходы"+(repeats>1?" и паузы":"")+" = "+period(row.seconds)};
+}
+
+return {byId,blocks,lying,ageOptions,defaults,clock,period,titleOf,poseTitle,rowTitle,fields,restrictions,conditions,isAllowed,candidates,hasFloorClass,advice,bounds,makeMain,generate,inspect,redistribute,rowDetails};
+})();
+const __assistant=(()=>{
+const {goals, warmLabels}=__catalog;
+const {advice, bounds, byId, candidates, conditions, generate, inspect, makeMain, poseTitle, redistribute}=__engine;
+
+const normalize = value => value.toLowerCase().replaceAll("ё","е").replace(/[«»"]/g,"").trim();
+const focusWords = {
+  chest:/грудн/u,lumbar:/поясниц/u,back:/спин/u,neck:/ше[яиюе]|плеч/u,hips:/тазобедр/u,
+  stretch:/растяж|гибк/u,strength:/силов|устойчив/u,balance:/баланс|координац/u,
+  relax:/расслаб|снижени.{0,12}напряж/u,mood:/настроени/u,energy:/бодр|энерг/u,posture:/осанк/u,desk:/сидяч.{0,10}дн/u,whole:/всего тела/u
+};
+function matchesPoses(query,pool) {
+  const matches=pool.flatMap(p=>[p.name,p.alias].filter(Boolean).map(name=>({pose:p,name:normalize(name)})))
+    .filter(item=>query.includes(item.name))
+    .sort((a,b)=>b.name.length-a.name.length);
+  return [...new Set(matches.filter(a=>a.name.length===matches[0]?.name.length).map(a=>a.pose.id))];
+}
+function parseRequest(text,plan) {
+  const t=normalize(text);
+  const duration=[...t.matchAll(/\b(60|90)\s*(?:минут|мин\.?)/gu)].map(m=>Number(m[1]));
+  const rest=[...t.matchAll(/\b(5|10|15|20)\s*(?:минут\w*|мин\.?)\s*шавасан|шавасан[аыуе]?\s*(?:на\s*)?(5|10|15|20)\s*(?:минут|мин\.?)/gu)].map(m=>Number(m[1]||m[2]));
+  if ((duration.length||rest.length)&&!/сохран|остав|не меня/u.test(t)) {
+    return {error:"Длительность класса и Шавасаны изменяются в параметрах. Сформулируйте изменение программы отдельно."};
+  }
+  if (duration.some(x=>x!==plan.params.duration)||rest.some(x=>x!==plan.params.savasana)) {
+    return {error:"Указанное время отличается от текущего плана. Проверьте длительность класса и Шавасану в параметрах."};
+  }
+  const wantsReplace=/замен/u.test(t);
+  const command={};
+  if (/мягч|мягк.{0,15}нагруз/u.test(t)) command.soft=true;
+  if (/без (?:опор.{0,18}|нагруз.{0,18})?(?:кист|запяст|ладон)/u.test(t)) command.noHands=true;
+  if (/друг(?:ой|ую|ая) вариант|пересоб/u.test(t)) command.variant=true;
+  if (/акцент|больше внимани|фокус|больше.{0,8}(?:на|для)|внимани.{0,20}отдел/u.test(t)) {
+    const goal=Object.entries(focusWords).find(([,re])=>re.test(t))?.[0];
+    if (goal) command.goal=goal;
+  }
+  if (wantsReplace) {
+    const parts=t.match(/замен(?:и|ить|ите)\s+(.+?)\s+на\s+(.+)/u);
+    if (parts) {
+      const from=matchesPoses(parts[1],plan.rows.filter(r=>r.block==="main").map(r=>byId.get(r.id)));
+      const to=matchesPoses(parts[2],candidates(plan.params));
+      if (from.length!==1||to.length!==1) return {error:"Уточните названия обеих асан. Замену также можно выбрать в строке программы."};
+      command.replace={from,to:to[0]};
+    } else if (!command.noHands) return null;
+  }
+  if (/удали|убери|добавь (?:[\d]|асан|поз)|переставь|поменяй порядок/u.test(t)&&Object.keys(command).length) {
+    return {error:"В запросе есть дополнительная правка. Уточните её отдельно или воспользуйтесь редактором строк."};
+  }
+  return Object.keys(command).length?{command}:null;
+}
+function suggest(plan,command) {
+  const old=plan.params, p=structuredClone(old), notes=[];
+  if (command.soft) {p.soft=true; notes.push("Мягкая нагрузка");}
+  if (command.goal) {
+    if (!Object.hasOwn(goals,command.goal)||command.goal==="custom") return {error:"Выберите акцент из списка."};
+    p.goal=command.goal; notes.push("Акцент · "+goals[p.goal]);
+  }
+  if (command.noHands&&!conditions(p).blocked.has("wrist")) {
+    p.limits=[p.limits,"без опоры на кисти"].filter(Boolean).join("; ");
+    notes.push("Исключена опора на кисти");
+  }
+  const warm=advice(p).find(x=>x.kind==="warm");
+  if (warm&&command.noHands) {p.warmup=warm.option;notes.push("Разминка · "+warmLabels[p.warmup]);}
+  const last=advice(p).find(x=>x.kind==="final");
+  if (last) return {error:last.text};
+
+  let result;
+  if (command.replace) {
+    const match=command.replace.from;
+    const row=plan.rows.find(r=>r.block==="main"&&(r.key===match||match.includes?.(r.id)));
+    const to=candidates(p).find(a=>a.id===command.replace.to);
+    if (!row||!to) return {error:"Эту замену нельзя применить с текущим уровнем, фильтрами и ограничениями. Выберите другую асану."};
+    if (command.goal||command.variant||command.soft||command.noHands) return {error:"Замену конкретной асаны и перестройку класса отправьте отдельными командами."};
+    const {min,max}=bounds(to);
+    const rows=plan.rows.map(r=>r.key===row.key?makeMain(to.id,row.key,Math.min(max,Math.max(min,row.seconds))):r);
+    notes.push(poseTitle(byId.get(row.id))+" → "+poseTitle(to));
+    result=redistribute({...plan,rows});
+  } else if (command.noHands&&!command.goal&&!command.soft&&!command.variant&&p.warmup===old.warmup) {
+    const pool=candidates(p);
+    if (!pool.length) return {error:"В каталоге нет подходящей замены без опоры на кисти при выбранных фильтрах."};
+    const allowed=new Set(pool.map(a=>a.id));
+    const seen=new Map();
+    const rows=plan.rows.map(r=>{
+      if (r.block!=="main"||allowed.has(r.id)) return r;
+      const a=byId.get(r.id);
+      const score=b=>(b.position===a.position?8:0)+b.tags.filter(x=>a.tags.includes(x)).length+2*(b.load<=a.load)-(seen.get(b.id)||0)*3;
+      const best=pool.reduce((first,b)=>score(b)>score(first)?b:first,pool[0]);
+      seen.set(best.id,(seen.get(best.id)||0)+1);
+      return makeMain(best.id,r.key,r.seconds);
+    });
+    result=redistribute({...plan,params:p,rows});
+  } else {
+    result=generate(p,(plan.variant??0)+1);
+  }
+  if (!result.plan) return result;
+  if (command.noHands&&p.warmup===old.warmup&&p.limits===old.limits&&!notes.length) notes.push("Условие об опоре на кисти уже действует");
+  if (command.variant) notes.push("Предложена новая последовательность");
+  const checked=inspect(result.plan);
+  if (checked.errors.length||checked.delta) return {error:"Предложение не прошло проверку программы."};
+  return {plan:result.plan,notes};
+}
+
+return {parseRequest,suggest};
+})();
+const __pdf=(()=>{
+const {diagramPaths, blockLabels}=__catalog;
+const {blocks, titleOf, fields, inspect, period, clock, rowDetails}=__engine;
+
+const width=595.28, height=841.89, margin=44, bottom=779, scale=2.65;
+const colors={ink:"#24352c", green:"#2b5c49", pale:"#edf4e9", muted:"#4d6156", line:"#dce6d9"};
+const normal="Arial, sans-serif", serif="Georgia, serif";
+function diagramUrl(id) {
+  const markup=diagramPaths[id];
+  if (!markup) return "";
+  return "data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 60"><g fill="none" stroke="#325d49" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+markup+'</g></svg>');
+}
+async function illustrations() {
+  return Object.fromEntries(await Promise.all(Object.keys(diagramPaths).map(async id=>{
+    const img=new Image();
+    img.src=diagramUrl(id);
+    try { await img.decode(); return [id,img]; } catch { return [id,null]; }
+  })));
+}
+function canvasPage() {
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.round(width*scale);
+  canvas.height=Math.round(height*scale);
+  const ctx=canvas.getContext("2d",{alpha:false});
+  ctx.scale(canvas.width/width,canvas.height/height);
+  ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,width,height);
+  return {canvas,ctx,lines:[],links:[]};
+}
+function font(ctx,size,family,weight) { ctx.font=weight+" "+size+"px "+family; }
+function wrap(ctx,text,available) {
+  const lines=[];
+  for (const p of String(text).split("\n")) {
+    let line="";
+    const units=p.replace(/(\d) (мин|с)(?=[\s.,+)·=]|$)/gu,"$1 $2");
+    for (const word of units.trim().split(/[ \t]+/)) {
+      if (line&&ctx.measureText(line+" "+word).width>available) {lines.push(line);line="";}
+      if (ctx.measureText(word).width>available) {
+        for (const character of word) {
+          if (line&&ctx.measureText(line+character).width>available) {lines.push(line);line="";}
+          line+=character;
+        }
+      } else line+=(line?" ":"")+word;
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+function write(page,line,x,y,{size=10,weight=400,family=normal,color=colors.ink}={}) {
+  const ctx=page.ctx;
+  font(ctx,size,family,weight);
+  ctx.fillStyle=color;
+  ctx.fillText(line,x,y);
+  page.lines.push({line,x,y,size,width:ctx.measureText(line).width});
+}
+function rect(page,x,y,w,h,color) {
+  page.ctx.fillStyle=color;
+  page.ctx.fillRect(x,y,w,h);
+}
+function lay(page,text,opts={}) {
+  font(page.ctx,opts.size??10,opts.family??normal,opts.weight??400);
+  return wrap(page.ctx,text,opts.width??(width-margin*2));
+}
+async function layout(plan) {
+  const images=await illustrations();
+  const pages=[];
+  const p=plan.params, data=inspect(plan), title=titleOf(p);
+  let page, y;
+  function start() {
+    page=canvasPage(); pages.push(page);
+    write(page,"ПРАКТИКА  /  ПЛАН ЗАНЯТИЯ",margin,49,{size:10,weight:700,color:colors.green});
+    rect(page,margin,60,width-margin*2,1,colors.line);
+    y=83;
+  }
+  function lines(text,opts={}) {
+    const prepared=lay(page,text,opts);
+    const step=opts.step??14;
+    for (const line of prepared) { write(page,line,opts.x??margin,y,opts); y+=step; }
+  }
+  function section(block,continuation=false) {
+    rect(page,margin,y-13,width-margin*2,24,colors.pale);
+    write(page,blockLabels[block]+(continuation?" · продолжение":""),margin+8,y+2,{size:13,family:serif,color:colors.green});
+    const duration=period(data.totals[block]);
+    font(page.ctx,10,normal,700);
+    write(page,duration,width-margin-8-page.ctx.measureText(duration).width,y+2,{weight:700,color:colors.green});
+    y+=27;
+  }
+  start();
+  lines(title,{size:25,step:30,family:serif,color:colors.green});
+  y+=3;
+  lines("Время по плану "+period(p.duration*60)+"  ·  В программе "+period(data.total),{size:11,step:17,weight:700});
+  if (data.delta) lines((data.delta>0?"Осталось распределить ":"Превышение на ")+period(Math.abs(data.delta)),{color:"#843a2e",weight:700});
+  for (const [label,value] of fields(p)) lines(label+" · "+value,{size:10,step:14});
+  if (plan.reviewNotes.length) {
+    y+=4;
+    for (const note of plan.reviewNotes) lines(note,{size:9,step:12,color:colors.muted});
+  }
+  y+=10;
+  for (const block of blocks) {
+    let count=0;
+    for (let i=0;i<data.timeline.length;i++) {
+      const row=data.timeline[i];
+      if (row.block!==block) continue;
+      const d=rowDetails(row,data.timeline[i+1],p), thumbnail=images[d.thumbnail];
+      const x=margin+94, textWidth=width-margin-x-(thumbnail?62:0);
+      const titleOpts={size:11,weight:700,width:textWidth};
+      const detailOpts={size:9.6,width:textWidth,color:colors.muted};
+      const sizes = [
+        [lay(page,d.title,titleOpts),titleOpts,14],
+        [lay(page,d.timing,detailOpts),detailOpts,13],
+        [lay(page,d.cue,detailOpts),detailOpts,13],
+        ...(d.variant?[[lay(page,"Вариант · "+d.variant,detailOpts),detailOpts,13]]:[])
+      ];
+      const rowHeight=Math.max(thumbnail?73:0,sizes.reduce((sum,[batch,,step])=>sum+batch.length*step,0)+(d.source?12:0)+15);
+      if (y+rowHeight+(count?0:27)>bottom) {start();section(block,count>0);}
+      else if (!count) section(block);
+      count++;
+      write(page,clock(row.start)+"–"+clock(row.end),margin+2,y,{size:10,weight:700,color:colors.green});
+      write(page,period(row.seconds),margin+2,y+15,{size:9,color:colors.muted});
+      const rowY=y;
+      if (thumbnail) {
+        rect(page,width-margin-56,y-10,56,44,colors.pale);
+        page.ctx.drawImage(thumbnail,width-margin-56,y-10,56,44);
+        write(page,"Схема проекта",width-margin-55,y+43,{size:7,color:colors.muted});
+      }
+      for (const [batch,opts,step] of sizes) for (const line of batch) {write(page,line,x,y,opts);y+=step;}
+      if (d.source) {
+        const source=d.source.includes("oum.ru")?"Источник · OUM.RU":"Источник · NCCIH";
+        write(page,source,x,y,{size:8.5,color:colors.green});
+        page.links.push({url:d.source,x,y,width:page.ctx.measureText(source).width});
+      }
+      y=rowY+rowHeight;
+      rect(page,margin,y-14,width-margin*2,.55,colors.line);
+    }
+    y+=8;
+  }
+  pages.forEach((item,i)=>{
+    rect(item,margin,797,width-margin*2,1,colors.line);
+    write(item,"Практика · программа для преподавателя",margin,814,{size:8.5,color:colors.muted});
+    write(item,"Стр. "+(i+1)+" / "+pages.length,width-margin-49,814,{size:8.5,color:colors.muted});
+  });
+  return pages;
+}
+const encoder = new TextEncoder();
+function utf16(value) {
+  let result="";
+  for (let i=0;i<value.length;i++) result+=value.charCodeAt(i).toString(16).padStart(4,"0");
+  return result;
+}
+const pdfNumber = n => Number(n.toFixed(2));
+const pdfString = text => text.replace(/[\\()]/g,char=>"\\"+char);
+function searchableText(pages) {
+  const codepoints=new Map();
+  for (const page of pages) for (const line of page.lines) for (const character of line.line) {
+    if (!codepoints.has(character)) codepoints.set(character,(codepoints.size+1).toString(16).padStart(4,"0"));
+  }
+  const mapping=[...codepoints].map(([c,id])=>"<"+id+"> <"+utf16(c)+">");
+  const sections=[];
+  for (let i=0;i<mapping.length;i+=100) {
+    const section=mapping.slice(i,i+100);
+    sections.push(section.length+" beginbfchar\n"+section.join("\n")+"\nendbfchar");
+  }
+  return {cmap:["/CIDInit /ProcSet findresource begin", "12 dict begin", "begincmap",
+    "/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def",
+    "/CMapName /Practice-Unicode def /CMapType 2 def", "1 begincodespacerange <0000> <FFFF> endcodespacerange",
+    ...sections,"endcmap CMapName currentdict /CMap defineresource pop end end",""].join("\n"),
+    encode:text=>[...text].map(c=>codepoints.get(c)).join("")};
+}
+function encodePdf(pages) {
+  const chunks=[], offsets=[0];
+  let size=0;
+  function append(data) {
+    const item=typeof data==="string"?encoder.encode(data):data;
+    chunks.push(item); size+=item.length;
+  }
+  const ids=pages.map((page,i)=>({page:7+i*3,image:8+i*3,stream:9+i*3}));
+  function object(id,...parts) {
+    offsets[id]=size; append(id+" 0 obj\n");
+    for (const part of parts) append(part);
+    append("\nendobj\n");
+  }
+  append("%PDF-1.7\n%"); append(new Uint8Array([226,227,207,211,10]));
+  object(1,"<< /Type /Catalog /Pages 2 0 R /Lang (ru-RU) >>");
+  object(2,"<< /Type /Pages /Count "+ids.length+" /Kids ["+ids.map(a=>a.page+" 0 R").join(" ")+"] >>");
+  const {cmap,encode}=searchableText(pages);
+  object(3,"<< /Type /Font /Subtype /Type0 /BaseFont /Helvetica /Encoding /Identity-H /DescendantFonts [4 0 R] /ToUnicode 6 0 R >>");
+  object(4,"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /Helvetica /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 5 0 R /DW 500 >>");
+  object(5,"<< /Type /FontDescriptor /FontName /Helvetica /Flags 4 /FontBBox [0 -250 1000 900] /ItalicAngle 0 /Ascent 900 /Descent -250 /CapHeight 700 /StemV 80 >>");
+  object(6,"<< /Length "+encoder.encode(cmap).length+" >>\nstream\n"+cmap+"endstream");
+  const linkObjects=[];
+  pages.forEach((page,i)=>{
+    const id=ids[i], jpg=Uint8Array.from(atob(page.canvas.toDataURL("image/jpeg",.9).split(",")[1]),c=>c.charCodeAt(0));
+    const annotations=page.links.map(l=>{
+      linkObjects.push("<< /Type /Annot /Subtype /Link /Border [0 0 0] /Rect ["+
+        [l.x,height-l.y-3,l.x+l.width,height-l.y+9].map(pdfNumber).join(" ")+"] /A << /S /URI /URI ("+pdfString(l.url)+") >> >>");
+      return 6+pages.length*3+linkObjects.length+" 0 R";
+    });
+    object(id.page,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+width+" "+height+"] /Resources << /XObject << /Im0 "+id.image+
+      " 0 R >> /Font << /F1 3 0 R >> >> /Contents "+id.stream+" 0 R /Annots ["+annotations.join(" ")+"] >>");
+    object(id.image,"<< /Type /XObject /Subtype /Image /Width "+page.canvas.width+" /Height "+page.canvas.height+
+      " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+jpg.length+" >>\nstream\n",jpg,"\nendstream");
+    // Use invisible Unicode text for search and copying over the high-resolution page image.
+    const text=page.lines.filter(l=>l.width>0).map(l=>"BT /F1 "+l.size+" Tf 3 Tr "+
+      pdfNumber(200*l.width/(l.size*[...l.line].length))+" Tz 1 0 0 1 "+
+      pdfNumber(l.x)+" "+pdfNumber(height-l.y)+" Tm <"+encode(l.line)+"> Tj ET").join("\n");
+    const contents="q "+width+" 0 0 "+height+" 0 0 cm /Im0 Do Q\n"+text+"\n";
+    object(id.stream,"<< /Length "+encoder.encode(contents).length+" >>\nstream\n"+contents+"endstream");
+  });
+  linkObjects.forEach((link,i)=>object(7+pages.length*3+i,link));
+  const xref=size;
+  append("xref\n0 "+offsets.length+"\n0000000000 65535 f \n");
+  for (const offset of offsets.slice(1)) append(String(offset).padStart(10,"0")+" 00000 n \n");
+  append("trailer\n<< /Size "+offsets.length+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF\n");
+  return new Blob(chunks,{type:"application/pdf"});
+}
+async function makePDF(plan) { return encodePdf(await layout(plan)); }
+
+return {diagramUrl,makePDF};
+})();
+const __app=(()=>{
+const {focusGroups, goals, positionLabels, typeLabels, compositionLabels, levelLabels, warmLabels, finalLabels, blockLabels}=__catalog;
+const {defaults, ageOptions, lying, blocks, byId, advice, bounds, candidates, conditions,
+  clock, period, fields, generate, inspect, makeMain, poseTitle, redistribute, rowDetails, rowTitle, titleOf}=__engine;
+const {parseRequest, suggest}=__assistant;
+const {diagramUrl, makePDF}=__pdf;
+
+const $ = (selector,root=document) => root.querySelector(selector);
+const $$ = (selector,root=document) => [...root.querySelectorAll(selector)];
+const chars={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};
+const esc = value => String(value??"").replace(/[&<>"']/g,char=>chars[char]);
+const form = $("#settings"), editor=$("#editor"), editForm=$("#edit-form");
+const fieldsForm=form.elements, storageKey="praktika-yoga-v2";
+const timeline=$("#timeline"), mobile=matchMedia("(max-width:740px)");
+let persistent=true, proposal=null, editing=null, previous=null, model=false, busy=false;
+let chat=[];
+let store={form:structuredClone(defaults),plan:null};
+try {
+  const data=JSON.parse(localStorage.getItem(storageKey)||"null");
+  if (data?.form&&data.plan?.params&&Array.isArray(data.plan.rows)) {
+    const checked=inspect(data.plan);
+    if (!checked.errors.length) store={form:{...defaults,...data.form},plan:data.plan};
+  } else if (data?.form) store.form={...defaults,...data.form};
+} catch { persistent=false; }
+if (!store.plan) store.plan=generate(defaults).plan??null;
+
+function save() {
+  try {localStorage.setItem(storageKey,JSON.stringify(store));persistent=true;}
+  catch {persistent=false;}
+}
+function option(id,label) {return '<option value="'+esc(id)+'">'+esc(label)+'</option>';}
+function fillSelect(element,dict) {
+  element.innerHTML=Object.entries(dict).map(([id,label])=>option(id,label)).join("");
+}
+$("#goal").innerHTML=focusGroups.map(([name,ids])=>'<optgroup label="'+esc(name)+'">'+ids.map(id=>option(id,goals[id])).join("")+"</optgroup>").join("");
+for (const [name,dict] of Object.entries({format:{group:"Групповое",personal:"Персональное"}, level:levelLabels, warmup:warmLabels, final:finalLabels})) fillSelect(fieldsForm[name],dict);
+fieldsForm.age.innerHTML=option("","Не указан")+ageOptions.filter(Boolean).map(age=>option(age,age)).join("");
+function checkMarkup(name,value,label,sub=false) {
+  return '<label class="check'+(sub?" suboption":"")+'"><input type="checkbox" name="'+name+'" value="'+esc(value)+'"> '+esc(label)+'</label>';
+}
+$("#positions .options").innerHTML=checkMarkup("position","standing",positionLabels.standing)+checkMarkup("position","seated",positionLabels.seated)+
+  checkMarkup("all-lying","lying","Лёжа · все три положения")+lying.map(id=>checkMarkup("position",id,positionLabels[id],true)).join("")+
+  ["kneeling","fours"].map(id=>checkMarkup("position",id,positionLabels[id])).join("");
+$("#types .options").innerHTML=Object.entries(typeLabels).map(([id,label])=>checkMarkup("type",id,label)).join("");
+const posInputs=$$('input[name="position"]',form), typeInputs=$$('input[name="type"]',form), allLying=$('input[name="all-lying"]',form);
+function composition(format,value) {
+  const labels=compositionLabels[format]??compositionLabels.group;
+  fillSelect(fieldsForm.composition,labels);
+  fieldsForm.composition.value=Object.hasOwn(labels,value)?value:"unspecified";
+  $("#age-label").textContent=format==="group"?"Примерный возраст":"Возраст";
+}
+function renderFilters() {
+  const n=posInputs.filter(i=>i.checked).length, t=typeInputs.filter(i=>i.checked).length;
+  const l=posInputs.filter(i=>lying.includes(i.value)&&i.checked).length;
+  allLying.checked=l===lying.length;allLying.indeterminate=l>0&&l<lying.length;
+  $("#positions .selection").textContent=n?"Выбрано "+n:"";
+  $("#types .selection").textContent=t?"Выбрано "+t:"";
+  $('[data-action="all"]').setAttribute("aria-pressed",String(!n&&!t));
+}
+function fillForm(p) {
+  for (const field of ["goal","custom","format","age","level","duration","warmup","warmMinutes","savasana","final","limits","equipment"]) {
+    fieldsForm[field].value=p[field];
+  }
+  fieldsForm.soft.checked=p.soft;
+  composition(p.format,p.composition);
+  for (const i of posInputs) i.checked=p.positions.includes(i.value);
+  for (const i of typeInputs) i.checked=p.types.includes(i.value);
+  $("#custom-wrap").hidden=p.goal!=="custom";
+  fieldsForm.custom.required=p.goal==="custom";
+  renderFilters();
+  renderAdvice(p);
+}
+function values() {
+  const p=Object.fromEntries([...new FormData(form)].filter(([key])=>!["position","type","all-lying","soft"].includes(key)));
+  return {...defaults,...p,custom:p.custom.trim(),limits:p.limits.trim(),equipment:p.equipment.trim(),
+    duration:Number(p.duration),savasana:Number(p.savasana),warmMinutes:Number(p.warmMinutes),
+    positions:posInputs.filter(input=>input.checked).map(input=>input.value),
+    types:typeInputs.filter(input=>input.checked).map(input=>input.value),soft:fieldsForm.soft.checked};
+}
+const sameForm = (a,b) => Object.keys(defaults).every(key=>JSON.stringify(a[key])===JSON.stringify(b[key]));
+function notice(selector,text,kind="error") {
+  const el=$(selector);
+  el.className=text?"notice "+kind:"";
+  el.textContent=text||"";
+  el.hidden=!text;
+}
+function renderAdvice(p) {
+  $("#form-advice").innerHTML=advice(p).map(note=>{
+    const button=note.option?'<br><button class="button small" type="button" data-action="'+note.kind+'" data-value="'+note.option+'">'+
+      esc(note.kind==="warm"?"Выбрать суставную гимнастику":"Выбрать «"+finalLabels[note.option]+"»")+"</button>":"";
+    return '<div class="notice '+(note.kind==="applied"?"good":"")+'">'+esc(note.text)+button+"</div>";
+  }).join("");
+}
+function formChanged() {
+  store.form=values();
+  $("#custom-wrap").hidden=store.form.goal!=="custom";
+  fieldsForm.custom.required=store.form.goal==="custom";
+  renderFilters(); renderAdvice(store.form); save();
+  notice("#form-error","");
+  proposal=null; renderProposal(); renderStatus();
+}
+function renderStatus() {
+  const stale=store.plan&&!sameForm(store.plan.params,store.form);
+  $("#plan-status").textContent=stale?"Параметры изменены. Составьте класс, чтобы обновить план.":
+    persistent?"Черновик сохраняется в браузере":"Хранение в браузере недоступно. Скачайте готовый план.";
+}
+const lookupBlocks = t => blocks.map(id=>[blockLabels[id],t[id]]);
+function renderPlan() {
+  renderStatus();
+  const plan=store.plan;
+  const safeButtons=$$('button[data-action="pdf"]');
+  if (!plan) {
+    safeButtons.forEach(b=>b.disabled=true);
+    $("#program-body").innerHTML='<div class="empty">Выберите параметры и нажмите «Составить класс».</div>';
+    timeline.innerHTML="";
+    return;
+  }
+  const {totals,total,delta,timeline:rows,errors}=inspect(plan), p=plan.params;
+  safeButtons.forEach(b=>b.disabled=Boolean(errors.length));
+  const meta=fields(p);
+  const summaryOpen=$(".info-details")?.open;
+  $("#program-body").innerHTML='<div class="plan-title"><h3>'+esc(titleOf(p))+'</h3><p class="plan-audience">'+
+    meta.slice(0,5).map(([label,value],i)=>esc(i===2?(p.age?label+" "+value:"возраст не указан"):i===3?"Уровень · "+value:value)).join(" · ")+
+    '</p><div class="timing-bar" aria-hidden="true" style="grid-template-columns:'+blocks.map(k=>Math.max(totals[k],1)+"fr").join(" ")+'"><span></span><span></span><span></span></div>'+
+    '<div class="totals">'+lookupBlocks(totals).map(([label,seconds])=>'<span>'+esc(label.replace(" и финальное расслабление",""))+" "+period(seconds)+'</span>').join("")+
+    '</div><details class="info-details"'+(summaryOpen?" open":"")+'><summary>Все параметры плана</summary><dl>'+meta.map(([label,value])=>'<div><dt>'+
+      esc(label)+'</dt><dd>'+esc(value)+'</dd></div>').join("")+'</dl></details></div>'+
+    '<div class="toolbar"><button class="button small" data-action="add" type="button">Добавить асану</button>'+
+    '<button class="button small" data-action="rebalance" type="button">Перераспределить время</button>'+
+    '<button class="button small" data-action="rebuild" type="button">Пересобрать</button>'+
+    (previous?'<button class="button small" data-action="undo" type="button">Отменить правку</button>':"")+
+    '<span class="time-delta'+(delta?" problem":"")+'" role="status">'+(delta?(delta>0?"Осталось распределить ":"Превышение на ")+period(Math.abs(delta)):"По плану "+period(total))+'</span></div>'+
+    [...plan.reviewNotes,...errors].map(t=>'<p class="notice">'+esc(t)+'</p>').join("");
+  const opened=new Set($$(".timeline-row[open]",timeline).map(el=>el.dataset.key));
+  timeline.innerHTML=blocks.map(block=>{
+    const group=rows.filter(r=>r.block===block);
+    return '<section class="block"><div class="block-head"><h3>'+esc(blockLabels[block])+'</h3><time>'+
+      period(totals[block])+'</time></div>'+group.map((r,i)=>renderRow(r,rows[rows.indexOf(r)+1],p,opened.has(r.key),i,group.length)).join("")+'</section>';
+  }).join("");
+}
+function renderRow(r,next,p,open,i,count) {
+  const d=rowDetails(r,next,p), key=esc(r.key);
+  const photo=d.thumbnail?'<img class="thumbnail" src="'+esc(diagramUrl(d.thumbnail))+'" alt="Авторская схема позы" title="Схема проекта «Практика»">':"";
+  const button=(name,label,disabled=false,extra="")=>'<button type="button" class="button small '+extra+'" data-action="'+name+'" data-key="'+key+'"'+(disabled?" disabled":"")+'>'+label+'</button>';
+  const actions=r.block==="main"?'<div class="row-actions">'+button("time","Изменить время")+button("replace","Заменить")+
+    button("up","Выше",i===0)+button("down","Ниже",i===count-1)+button("remove","Удалить",false,"remove")+'</div>':"";
+  return '<details class="timeline-row" data-key="'+key+'"'+(open?" open":"")+'> <summary><span class="interval">'+clock(r.start)+"–"+clock(r.end)+
+    '</span><span class="row-name">'+esc(d.title)+'<span class="row-time">'+esc(d.timing)+'</span></span><span class="row-duration">'+period(r.seconds)+'</span></summary>'+
+    '<div class="row-details"><div class="row-copy">'+photo+'<div><p>'+esc(d.cue)+'</p>'+
+    (d.sanskrit?'<p lang="sa">'+esc(d.sanskrit)+'</p>':"")+(d.variant?'<p><strong>Вариант.</strong> '+esc(d.variant)+'</p>':"")+
+    (d.supports?'<p><strong>Опоры при наличии.</strong> '+esc(d.supports)+'</p>':"")+
+    (d.source?'<a href="'+esc(d.source)+'" target="_blank" rel="noreferrer">'+(d.source.includes("oum.ru")?"Источник · OUM.RU":"Ориентиры · NCCIH")+'</a>':"")+
+    '</div></div>'+actions+'</div></details>';
+}
+function commit(plan,{replaceForm=false,announce=""}={}) {
+  previous=store.plan?{plan:store.plan,form:store.form}:null;
+  store.plan=plan;
+  if (replaceForm) {store.form=structuredClone(plan.params);fillForm(store.form);}
+  proposal=null;
+  save();renderPlan();renderProposal();
+  notice("#form-error","");
+  notice("#program-message",announce,"good");
+}
+function build(variant) {
+  const p=values();
+  store.form=p;
+  const result=generate(p,variant);
+  if (!result.plan) {notice("#form-error",result.error);save();renderStatus();return;}
+  commit(result.plan,{replaceForm:true});
+  if (mobile.matches) $("#program").scrollIntoView({block:"start"});
+}
+function newKey() {
+  return "edit-"+(globalThis.crypto?.randomUUID?.()??Date.now()+"-"+Math.random().toString(36).slice(2));
+}
+function openEditor(action,key) {
+  const plan=store.plan;
+  const row=plan.rows.find(r=>r.key===key);
+  const pool=candidates(plan.params).sort((a,b)=>poseTitle(a).localeCompare(poseTitle(b),"ru"));
+  const choices=action==="replace"?pool.filter(a=>a.id!==row.id):pool;
+  if (!choices.length&&action!=="time") {
+    notice("#program-message","Для текущих параметров нет других подходящих асан.");return;
+  }
+  editing={action,key,row,plan};
+  $("#edit-title").textContent={add:"Добавить асану",replace:"Заменить асану",time:"Изменить время"}[action];
+  $("#edit-pose-wrap").hidden=action==="time";
+  editForm.elements.pose.innerHTML=choices.map(a=>option(a.id,poseTitle(a))).join("");
+  editForm.elements.pose.disabled=action==="time";
+  notice("#edit-error","");
+  editChoice(true);
+  editor.showModal();
+}
+function editChoice(initial=false) {
+  const {action,row}=editing, e=editForm.elements;
+  const id=action==="time"?row.id:e.pose.value;
+  const pose=byId.get(id), {min,max}=bounds(pose);
+  e.seconds.min=min;e.seconds.max=max;
+  if (initial||action!=="time") e.seconds.value=Math.max(min,Math.min(max,row?.seconds??makeMain(id,"").seconds));
+  $("#edit-hint").textContent=poseTitle(pose)+" · от "+min+" до "+max+" с";
+}
+function changeRows(rows,announcement) {
+  const plan={...store.plan,rows}, checked=inspect(plan);
+  if (checked.errors.length) {notice("#program-message",checked.errors.join(" "));return false;}
+  commit(plan,{announce:announcement});
+  return true;
+}
+function line(text,user=false) {
+  chat=[...chat,{text,user}].slice(-7);
+  $("#chat-log").innerHTML=chat.map(entry=>'<p class="chat-line'+(entry.user?" user":"")+'">'+esc(entry.text)+'</p>').join("");
+}
+function showProposal(next, notes, location="chat") {
+  proposal={base:store.plan,plan:next,notes,location};
+  renderProposal();
+}
+function renderProposal() {
+  const target=$("#proposal");
+  const old=$("#rebalance-proposal");
+  if (old) old.remove();
+  target.innerHTML="";
+  if (!proposal) return;
+  const {plan,notes,location}=proposal, data=inspect(plan);
+  const list=data.timeline.map(r=>"<li>"+clock(r.start)+"–"+clock(r.end)+" · "+esc(rowTitle(r))+" · "+period(r.seconds)+"</li>").join("");
+  const content='<div class="proposal" id="'+(location==="program"?"rebalance-proposal":"chat-proposal")+'">'+
+    '<p><strong>Предлагаемые изменения</strong></p>'+notes.map(t=>'<p>'+esc(t)+'</p>').join("")+
+    '<p>'+lookupBlocks(data.totals).map(([label,sec])=>esc(label.replace(" и финальное расслабление",""))+" "+period(sec)).join(" · ")+'</p>'+
+    '<details class="preview-details"><summary>Последовательность с таймингом</summary><ol class="preview-list">'+list+'</ol></details>'+
+    '<div class="proposal-actions"><button type="button" class="button primary" data-action="apply">Применить</button><button type="button" class="button small" data-action="dismiss">Закрыть</button></div></div>';
+  if (location==="program") timeline.insertAdjacentHTML("beforebegin",content); else target.innerHTML=content;
+}
+async function ask(text) {
+  if (!text.trim()||busy) return;
+  const plan=store.plan;
+  if (!plan) {line("Сначала составьте класс.");return;}
+  if (!sameForm(plan.params,store.form)) {line("Составьте класс с изменёнными параметрами, чтобы обновить черновик.");return;}
+  line(text,true); proposal=null; renderProposal();
+  const local=parseRequest(text,plan);
+  if (local?.error) {line(local.error);return;}
+  let command=local?.command;
+  if (!command) {
+    if (!model) {line("Попробуйте «Сделай класс мягче», «Подбери замену без опоры на кисти» или укажите новый акцент.");return;}
+    if (!$("#send-model").checked) {line("Для этой команды нужно разрешить передачу запроса подключённой модели.");return;}
+    busy=true; $("#ask").disabled=true;
+    const formAtRequest=store.form;
+    try {
+      const p=plan.params, context=conditions(p);
+      const response=await fetch("/api/assistant",{method:"POST",headers:{"Content-Type":"application/json"},signal:AbortSignal.timeout(29000),
+        body:JSON.stringify({consent:true,text,context:{
+          goal:p.goal,level:p.level,format:p.format,composition:p.composition,age:p.age,duration:p.duration,
+          savasana:p.savasana,warmMinutes:p.warmMinutes,warmup:p.warmup,final:p.final,soft:p.soft,
+          positions:p.positions,types:p.types,limits:[...context.blocked],equipment:[...context.supplied],
+          needsReview:context.unknown.length>0,poses:candidates(p).map(a=>[a.id,poseTitle(a)]),
+          rows:plan.rows.filter(r=>r.block==="main").map(r=>[r.key,r.id,r.seconds])
+        }})});
+      const data=await response.json();
+      if (!response.ok) throw new Error(data.error||"Модель недоступна.");
+      if (store.plan!==plan||store.form!==formAtRequest) {line("План изменился во время запроса. Отправьте команду ещё раз.");return;}
+      command=data.command;
+    } catch(e) {line(e.name==="TimeoutError"?"Модель не успела ответить.":e.message||"Модель недоступна.");return;}
+    finally {busy=false;$("#ask").disabled=false;}
+  }
+  if (command.ask) {line(command.ask);return;}
+  const result=suggest(plan,command);
+  if (result.error) {line(result.error);return;}
+  showProposal(result.plan,result.notes);
+}
+async function downloadPdf() {
+  const plan=store.plan;
+  if (!plan) return;
+  const buttons=$$('button[data-action="pdf"]');
+  buttons.forEach(b=>{b.disabled=true;b.textContent="Готовим PDF…";});
+  try {
+    const file=await makePDF(plan), url=URL.createObjectURL(file);
+    const link=document.createElement("a");
+    link.href=url;link.download="Практика · план занятия.pdf";
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  } catch {
+    notice("#program-message","PDF не удалось подготовить. Повторите скачивание.");
+  } finally {
+    buttons.forEach(b=>{b.disabled=false;b.textContent="Скачать PDF";});
+  }
+}
+form.addEventListener("submit",e=>{e.preventDefault();build(0);});
+form.addEventListener("input",e=>{
+  if (e.target===fieldsForm.format) composition(fieldsForm.format.value,fieldsForm.composition.value);
+  if (e.target===allLying) posInputs.filter(i=>lying.includes(i.value)).forEach(i=>i.checked=allLying.checked);
+  formChanged();
+});
+editForm.elements.pose.addEventListener("change",()=>editChoice());
+editForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  if (editing.plan!==store.plan) {notice("#edit-error","Программа изменилась. Откройте редактор снова.");return;}
+  const {action,key,row}=editing;
+  const r=makeMain(action==="time"?row.id:editForm.elements.pose.value,key||newKey(),editForm.elements.seconds.valueAsNumber);
+  const rows=store.plan.rows.slice();
+  if (action==="add") rows.splice(rows.findIndex(a=>a.block==="final"),0,r);
+  else rows[rows.findIndex(a=>a.key===key)]=r;
+  if (changeRows(rows,action==="add"?"Асана добавлена.":"Строка обновлена.")) {
+    editor.close();
+    const selected=$$(".timeline-row").find(el=>el.dataset.key===r.key);
+    if (selected) {selected.open=true;$("summary",selected)?.focus({preventScroll:true});}
+  }
+});
+$("#chat-form").addEventListener("submit",e=>{e.preventDefault();const el=$("#chat-text");const text=el.value.trim();if(!busy){el.value="";void ask(text);}});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button[data-action],button[data-chat]");
+  if (!b) return;
+  if (b.dataset.chat) {void ask(b.dataset.chat);return;}
+  const {action,key,value}=b.dataset;
+  const plan=store.plan;
+  if (action==="all") {for (const input of [...posInputs,...typeInputs]) input.checked=false;formChanged();}
+  if (action==="warm"||action==="final") {fieldsForm[action==="warm"?"warmup":"final"].value=value;formChanged();}
+  if (action==="pdf") void downloadPdf();
+  if (action==="rebuild") build((plan?.variant??0)+1);
+  if (["add","replace","time"].includes(action)) openEditor(action,key);
+  if (action==="close") editor.close();
+  if (action==="remove") changeRows(plan.rows.filter(r=>r.key!==key),"Асана удалена. Правку можно отменить.");
+  if (action==="up"||action==="down") {
+    const rows=plan.rows.slice(), index=rows.findIndex(r=>r.key===key), next=index+(action==="up"?-1:1);
+    if (rows[next]?.block!=="main") return;
+    [rows[index],rows[next]]=[rows[next],rows[index]];
+    changeRows(rows,"Порядок асан изменён.");
+    const selected=$$(".timeline-row").find(el=>el.dataset.key===key);
+    $("summary",selected)?.focus({preventScroll:true});
+  }
+  if (action==="undo"&&previous) {
+    store=previous;previous=null;proposal=null;fillForm(store.form);save();renderPlan();renderProposal();
+    notice("#program-message","Последняя правка отменена.","good");
+  }
+  if (action==="rebalance") {
+    const result=redistribute(plan);
+    if (result.error) notice("#program-message",result.error);
+    else {
+      const count=plan.rows.filter((r,i)=>r.seconds!==result.plan.rows[i].seconds).length;
+      if (!count) notice("#program-message","Время уже соответствует плану.","good");
+      else {
+        notice("#program-message","");
+        showProposal(result.plan,["Строк, где изменится время: "+count+". Разминка и финальный отдых сохранят длительность."],"program");
+      }
+    }
+  }
+  if (action==="dismiss") {proposal=null;renderProposal();}
+  if (action==="apply"&&proposal?.base===plan) {
+    const location=proposal.location;
+    commit(proposal.plan,{replaceForm:location==="chat",announce:"Предложение применено. Время пересчитано."});
+    if (location==="chat") line("Изменения применены к текущей программе.");
+  }
+});
+fillForm(store.form);save();renderPlan();
+if (location.protocol==="http:"||location.protocol==="https:") {
+  fetch("/api/status",{signal:AbortSignal.timeout(2500)}).then(r=>r.ok?r.json():null).then(data=>{
+    model=Boolean(data?.configured);
+    $("#model-status").textContent=model?"Модель настроена · локальные команды доступны":"Локальные команды · модель не подключена";
+    $("#model-consent").hidden=!model;
+  }).catch(()=>{});
+}
+
+return {};
+})();
+</script>
+</body>
+</html>
